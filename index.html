@@ -1,88 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ILS Flight Analysis</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0b1724;
-      color: white;
-      text-align: center;
-    }
+<title>ILS Flight Analysis – LBSF</title>
 
-    header {
-      padding: 70px 20px;
-      background: linear-gradient(135deg, #102a43, #006d77);
-    }
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-    h1 {
-      font-size: 42px;
-      margin-bottom: 10px;
-    }
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    .subtitle {
-      font-size: 19px;
-      color: #d8e6ee;
-    }
+<style>
 
-    main {
-      max-width: 900px;
-      margin: auto;
-      padding: 45px 20px;
-    }
+body {
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#07111f;
+    color:white;
+}
 
-    .box {
-      background: #142638;
-      border-radius: 12px;
-      padding: 25px;
-      margin: 20px 0;
-    }
+header {
+    padding:20px;
+    background:#0d2238;
+    text-align:center;
+}
 
-    footer {
-      margin-top: 50px;
-      padding: 20px;
-      color: #8fa6b8;
-      font-size: 14px;
-    }
-  </style>
+header h1 {
+    margin:0;
+    font-size:30px;
+}
+
+header p {
+    margin:8px 0 0;
+    color:#b9ccdc;
+}
+
+.info {
+    padding:15px;
+    text-align:center;
+}
+
+#map {
+    height:65vh;
+    width:100%;
+}
+
+.panel {
+    margin:15px;
+    padding:18px;
+    background:#102338;
+    border-radius:10px;
+}
+
+.value {
+    color:#5ed6ff;
+    font-weight:bold;
+}
+
+</style>
 </head>
 
 <body>
 
 <header>
-  <h1>ILS Flight Analysis</h1>
-  <div class="subtitle">
-    ADS-B based analysis of aircraft ILS approach trajectories
-  </div>
+<h1>ILS Flight Analysis</h1>
+<p>LBSF – Sofia Airport</p>
 </header>
 
-<main>
+<div class="info">
+RWY 27 ILS approach visualization
+</div>
 
-  <div class="box">
-    <h2>About the project</h2>
-    <p>
-      This project analyzes aircraft approach trajectories using ADS-B data
-      and compares them with the theoretical ILS approach path.
-    </p>
-  </div>
+<div id="map"></div>
 
-  <div class="box">
-    <h2>Analysis</h2>
-    <p>
-      Flight trajectory visualization, localizer deviation
-      and glide path analysis will be available here.
-    </p>
-  </div>
+<div class="panel">
 
-</main>
+<h3>ILS RWY 27</h3>
 
-<footer>
-  ILS Flight Analysis Project
-</footer>
+<p>
+Localizer: <span class="value">ISF – 109.5 MHz</span>
+</p>
+
+<p>
+Glide Path: <span class="value">3.0°</span>
+</p>
+
+<p>
+Runway: <span class="value">09 / 27</span>
+</p>
+
+<p>
+Next step: ADS-B aircraft trajectory analysis
+</p>
+
+</div>
+
+<script>
+
+/* Map */
+
+const map = L.map('map').setView(
+    [42.696,23.42],
+    12
+);
+
+L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+    maxZoom:19,
+    attribution:'© OpenStreetMap'
+}
+).addTo(map);
+
+
+/*
+Approximate runway threshold coordinates
+RWY 09 and RWY 27
+*/
+
+const rwy09 = [42.69750,23.39950];
+const rwy27 = [42.69516,23.43966];
+
+
+/* Runway */
+
+L.polyline(
+[rwy09,rwy27],
+{
+    color:'white',
+    weight:7
+}
+).addTo(map)
+.bindPopup("LBSF RWY 09/27");
+
+
+/* Threshold markers */
+
+L.marker(rwy09)
+.addTo(map)
+.bindPopup("RWY 09");
+
+L.marker(rwy27)
+.addTo(map)
+.bindPopup("RWY 27");
+
+
+/*
+ILS RWY 27 approach axis
+Approximate extension east of RWY27
+*/
+
+const ils27 = [
+[42.69516,23.43966],
+[42.6918,23.5000],
+[42.6880,23.5700],
+[42.6840,23.6400]
+];
+
+
+L.polyline(
+ils27,
+{
+    color:'#00e5ff',
+    weight:4,
+    dashArray:'10,8'
+}
+).addTo(map)
+.bindPopup("ILS RWY 27 approach axis");
+
+
+/* Labels */
+
+L.circleMarker(
+rwy27,
+{
+    radius:7
+}
+).addTo(map)
+.bindTooltip(
+"RWY 27 threshold",
+{permanent:true}
+);
+
+</script>
 
 </body>
 </html>
