@@ -3,99 +3,254 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ILS Flight Analysis – LBSF RWY 27</title>
 
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<title>ILS Flight Analysis – LBSF</title>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#07111f;
-  color:white;
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #07111f;
+    color: white;
+    font-family: Arial, sans-serif;
 }
-header{
-  background:#0d2238;
-  text-align:center;
-  padding:18px;
+
+header {
+    background: #0d2238;
+    text-align: center;
+    padding: 18px;
 }
-header h1{margin:0;font-size:28px}
-header p{margin:7px;color:#b9ccdc}
-#map{height:68vh;width:100%}
-.panel{
-  margin:14px;
-  padding:18px;
-  background:#102338;
-  border-radius:12px;
+
+header h1 {
+    margin: 0;
+    font-size: 28px;
 }
-.value{color:#5ed6ff;font-weight:bold}
-.note{color:#ffcc66;font-size:13px}
-.legend{line-height:1.8}
+
+header p {
+    margin: 7px 0 0;
+    color: #b9ccdc;
+}
+
+#map {
+    width: 100%;
+    height: 65vh;
+    background: #dddddd;
+}
+
+.panel {
+    margin: 14px;
+    padding: 18px;
+    background: #102338;
+    border-radius: 12px;
+}
+
+.value {
+    color: #5ed6ff;
+    font-weight: bold;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>ILS Flight Analysis</h1>
-<p>LBSF Sofia Airport — RWY 27</p>
+    <h1>ILS Flight Analysis</h1>
+    <p>LBSF Sofia Airport – RWY 27</p>
 </header>
 
 <div id="map"></div>
 
 <div class="panel">
+    <h2>Diagnostic map</h2>
 
-<h2>ILS RWY 27 — ISF</h2>
+    <p>
+        🔴 LOC ISF:
+        <span class="value">109.5 MHz</span>
+    </p>
 
-<p>LOC:
-<span class="value">109.5 MHz</span></p>
+    <p>
+        🟣 GP / DME:
+        <span class="value">332.6 MHz / CH 32X</span>
+    </p>
 
-<p>GP:
-<span class="value">332.6 MHz / 3.0°</span></p>
-
-<p>DME:
-<span class="value">CH 32X</span></p>
-
-<p>Category:
-<span class="value">CAT II / III</span></p>
-
-<hr>
-
-<div class="legend">
-<b>Map:</b><br>
-🔴 LOC antenna<br>
-🟣 GP / DME antenna<br>
-⚪ RWY 27 threshold<br>
-🔵 LOC centreline<br>
-🟢 ICAO ±10° / 25 NM<br>
-🟡 ICAO 10°–35° / 17 NM
+    <p>
+        ⚪ RWY 27 threshold
+    </p>
 </div>
 
-<p class="note">
-The coloured sectors show ICAO standard LOC coverage geometry,
-not a confirmed LBSF-specific operational DOC.
-</p>
 
-</div>
+<script
+src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
 
 <script>
 
-/* ---------- MAP ---------- */
+/* =========================
+   CREATE MAP
+========================= */
 
-const map =
-L.map('map').setView([42.70,23.55],10);
+const map = L.map('map').setView(
+    [42.695, 23.430],
+    14
+);
+
+
+/* =========================
+   OPENSTREETMAP
+========================= */
 
 L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{
- maxZoom:19,
- attribution:'© OpenStreetMap'
-}).addTo(map);
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+    }
+).addTo(map);
 
 
-/* ---------- AIP COORDINATES ---------- */
+/* =========================
+   COORDINATES
+========================= */
 
 /* LOC ISF
+42°41'52.6"N
+023°23'32.1"E
+*/
+
+const LOC = [
+    42.697944,
+    23.392250
+];
+
+
+/* GP / DME
+42°41'47.1"N
+023°26'08.9"E
+*/
+
+const GP = [
+    42.696417,
+    23.435806
+];
+
+
+/* RWY 27 THRESHOLD
+42°41'42.38"N
+023°26'22.99"E
+*/
+
+const THR27 = [
+    42.695106,
+    23.439719
+];
+
+
+/* =========================
+   LOC MARKER
+========================= */
+
+L.circleMarker(
+    LOC,
+    {
+        radius: 9,
+        color: 'red',
+        fillColor: 'red',
+        fillOpacity: 1
+    }
+)
+.addTo(map)
+.bindTooltip(
+    'LOC ISF',
+    {
+        permanent: true,
+        direction: 'top'
+    }
+);
+
+
+/* =========================
+   GP / DME MARKER
+========================= */
+
+L.circleMarker(
+    GP,
+    {
+        radius: 9,
+        color: 'purple',
+        fillColor: 'purple',
+        fillOpacity: 1
+    }
+)
+.addTo(map)
+.bindTooltip(
+    'GP / DME',
+    {
+        permanent: true,
+        direction: 'top'
+    }
+);
+
+
+/* =========================
+   RWY 27 THRESHOLD
+========================= */
+
+L.circleMarker(
+    THR27,
+    {
+        radius: 9,
+        color: 'black',
+        weight: 2,
+        fillColor: 'white',
+        fillOpacity: 1
+    }
+)
+.addTo(map)
+.bindTooltip(
+    'RWY 27 THR',
+    {
+        permanent: true,
+        direction: 'right'
+    }
+);
+
+
+/* =========================
+   LINE LOC → THRESHOLD
+========================= */
+
+L.polyline(
+    [LOC, THR27],
+    {
+        color: '#00e5ff',
+        weight: 4
+    }
+)
+.addTo(map);
+
+
+/* =========================
+   FIT ALL POINTS
+========================= */
+
+const bounds = L.latLngBounds(
+    [LOC, GP, THR27]
+);
+
+map.fitBounds(
+    bounds,
+    {
+        padding: [40,40]
+    }
+);
+
+</script>
+
+</body>
+</html>
