@@ -223,14 +223,40 @@ L.polyline(
     }
 )
 .addTo(map);
+    /* ILS LOC coverage: +/-10 degrees to 25 NM */
+
+const LEFT_10_25 =
+    destination(LOC, LOC_BEARING - 10, 25);
+
+const RIGHT_10_25 =
+    destination(LOC, LOC_BEARING + 10, 25);
+
+L.polygon(
+    [
+        LOC,
+        LEFT_10_25,
+        CENTER_25NM,
+        RIGHT_10_25
+    ],
+    {
+        color: '#00cc66',
+        weight: 2,
+        fillColor: '#00ff88',
+        fillOpacity: 0.15
+    }
+)
+.addTo(map)
+.bindPopup('ICAO LOC coverage: +/-10 deg to 25 NM');
 
 /* Show all three points */
 
 const bounds = L.latLngBounds([
     LOC,
     GP,
-    THR27, 
-    CENTER_25NM
+    THR27,
+    CENTER_25NM,
+    LEFT_10_25,
+    RIGHT_10_25
 ]);
 
 map.fitBounds(bounds, {
