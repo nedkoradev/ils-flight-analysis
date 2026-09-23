@@ -158,14 +158,79 @@ L.polyline([LOC, THR27], {
     color: '#00e5ff',
     weight: 4
 }).addTo(map);
+/* Calculate bearing LOC -> RWY 27 threshold */
 
+function getBearing(a, b) {
+
+    const lat1 = a[0] * Math.PI / 180;
+    const lat2 = b[0] * Math.PI / 180;
+    const dLon = (b[1] - a[1]) * Math.PI / 180;
+
+    const y = Math.sin(dLon) * Math.cos(lat2);
+
+    const x =
+        Math.cos(lat1) * Math.sin(lat2) -
+        Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+
+/* Calculate point at distance and bearing */
+
+function destination(point, bearing, distanceNM) {
+
+    const R = 6371000;
+    const distance = distanceNM * 1852;
+
+    const lat1 = point[0] * Math.PI / 180;
+    const lon1 = point[1] * Math.PI / 180;
+    const brng = bearing * Math.PI / 180;
+
+    const lat2 = Math.asin(
+        Math.sin(lat1) * Math.cos(distance / R) +
+        Math.cos(lat1) * Math.sin(distance / R) *
+        Math.cos(brng)
+    );
+
+    const lon2 = lon1 + Math.atan2(
+        Math.sin(brng) * Math.sin(distance / R) *
+        Math.cos(lat1),
+        Math.cos(distance / R) -
+        Math.sin(lat1) * Math.sin(lat2)
+    );
+
+    return [
+        lat2 * 180 / Math.PI,
+        lon2 * 180 / Math.PI
+    ];
+}
+
+
+/* LOC centreline extended to 25 NM */
+
+const LOC_BEARING = getBearing(LOC, THR27);
+
+const CENTER_25NM =
+    destination(LOC, LOC_BEARING, 25);
+
+L.polyline(
+    [LOC, CENTER_25NM],
+    {
+        color: '#00e5ff',
+        weight: 3,
+        dashArray: '10, 8'
+    }
+)
+.addTo(map);
 
 /* Show all three points */
 
 const bounds = L.latLngBounds([
     LOC,
     GP,
-    THR27
+    THR27, 
+    CENTER_25NM
 ]);
 
 map.fitBounds(bounds, {
