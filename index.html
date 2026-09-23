@@ -1,63 +1,178 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>ILS Flight Analysis</title>
+<title>ILS Flight Analysis – LBSF</title>
 
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
-body {
-  margin: 0;
-  background: #07111f;
-  color: white;
-  font-family: Arial, sans-serif;
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #07111f;
+    color: white;
+    font-family: Arial, sans-serif;
 }
 
 header {
-  background: #0d2238;
-  text-align: center;
-  padding: 18px;
+    background: #0d2238;
+    text-align: center;
+    padding: 18px;
 }
 
 header h1 {
-  margin: 0;
+    margin: 0;
+    font-size: 28px;
 }
 
 header p {
-  color: #b9ccdc;
+    margin: 7px 0 0;
+    color: #b9ccdc;
 }
 
 #map {
-  height: 68vh;
-  width: 100%;
+    width: 100%;
+    height: 65vh;
 }
 
 .panel {
-  margin: 15px;
-  padding: 18px;
-  background: #102338;
-  border-radius: 12px;
+    margin: 14px;
+    padding: 18px;
+    background: #102338;
+    border-radius: 12px;
 }
 
-.blue { color:#00e5ff; }
-.green { color:#00ff88; }
-.yellow { color:#ffd54f; }
+.value {
+    color: #5ed6ff;
+    font-weight: bold;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>ILS Flight Analysis</h1>
-<p>LBSF Sofia Airport - RWY 27</p>
+    <h1>ILS Flight Analysis</h1>
+    <p>LBSF Sofia Airport – RWY 27</p>
 </header>
 
 <div id="map"></div>
 
 <div class="panel">
+    <h2>ILS RWY 27 – ISF</h2>
 
-<h2>ILS RWY 27
+    <p>LOC: <span class="value">109.5 MHz</span></p>
+    <p>GP: <span class="value">332.6 MHz / 3.0°</span></p>
+    <p>DME: <span class="value">CH 32X</span></p>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+const map = L.map('map').setView([42.695, 23.430], 14);
+
+L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+    }
+).addTo(map);
+
+
+/* LOC ISF */
+const LOC = [
+    42.697944,
+    23.392250
+];
+
+
+/* GP / DME */
+const GP = [
+    42.696417,
+    23.435806
+];
+
+
+/* RWY 27 threshold */
+const THR27 = [
+    42.695106,
+    23.439719
+];
+
+
+/* LOC */
+
+L.circleMarker(LOC, {
+    radius: 9,
+    color: 'red',
+    fillColor: 'red',
+    fillOpacity: 1
+})
+.addTo(map)
+.bindTooltip('LOC ISF', {
+    permanent: true,
+    direction: 'top'
+});
+
+
+/* GP / DME */
+
+L.circleMarker(GP, {
+    radius: 9,
+    color: 'purple',
+    fillColor: 'purple',
+    fillOpacity: 1
+})
+.addTo(map)
+.bindTooltip('GP / DME', {
+    permanent: true,
+    direction: 'top'
+});
+
+
+/* RWY 27 threshold */
+
+L.circleMarker(THR27, {
+    radius: 9,
+    color: 'black',
+    weight: 2,
+    fillColor: 'white',
+    fillOpacity: 1
+})
+.addTo(map)
+.bindTooltip('RWY 27 THR', {
+    permanent: true,
+    direction: 'right'
+});
+
+
+/* LOC axis to threshold */
+
+L.polyline([LOC, THR27], {
+    color: '#00e5ff',
+    weight: 4
+}).addTo(map);
+
+
+/* Show all three points */
+
+const bounds = L.latLngBounds([
+    LOC,
+    GP,
+    THR27
+]);
+
+map.fitBounds(bounds, {
+    padding: [40, 40]
+});
+
+</script>
+
+</body>
+</html>
