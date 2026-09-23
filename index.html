@@ -24,7 +24,7 @@ body {
 header {
     background: #0c2138;
     color: white;
-    padding: 25px;
+    padding: 24px;
     text-align: center;
 }
 
@@ -34,7 +34,7 @@ header h1 {
 }
 
 header p {
-    margin: 10px 0 0;
+    margin: 8px 0 0;
     color: #bdd0e2;
 }
 
@@ -109,6 +109,12 @@ header p {
 #fileInfo {
     margin-top: 15px;
     color: #52677c;
+    line-height: 1.7;
+}
+
+.status {
+    margin-top: 12px;
+    font-weight: bold;
 }
 
 .chart-card {
@@ -146,11 +152,7 @@ header p {
     text-align: center;
 }
 
-.direction-left {
-    border-top: 1px solid #8191a1;
-    padding-top: 8px;
-}
-
+.direction-left,
 .direction-right {
     border-top: 1px solid #8191a1;
     padding-top: 8px;
@@ -177,22 +179,20 @@ header p {
         margin-right: 15px;
         font-size: 12px;
     }
-
 }
 
 </style>
 </head>
 
-
 <body>
 
 <header>
 
-    <h1>ILS Flight Analysis</h1>
+<h1>ILS Flight Analysis</h1>
 
-    <p>
-        ADS-B trajectory analysis against ILS localizer reference
-    </p>
+<p>
+ADS-B trajectory analysis against ILS localizer reference
+</p>
 
 </header>
 
@@ -213,7 +213,7 @@ header p {
         <strong>27</strong>
 
         <span class="cat">
-            CAT III
+        CAT III
         </span>
 
     </div>
@@ -223,14 +223,12 @@ header p {
 
         <button
             id="btn5"
-            class="active"
-            onclick="setRange(5)">
+            class="active">
             5 NM
         </button>
 
         <button
-            id="btn10"
-            onclick="setRange(10)">
+            id="btn10">
             10 NM
         </button>
 
@@ -242,23 +240,28 @@ header p {
 
 <div class="upload-box">
 
-    <h2>
-        Load ADS-B flight data
-    </h2>
+<h2>
+Load ADS-B flight data
+</h2>
 
-    <p>
-        Select the ADS-B file containing the aircraft trajectory.
-    </p>
+<p>
+Select the CSV file containing the aircraft trajectory.
+</p>
 
-    <input
-        type="file"
-        id="fileInput"
-        accept=".json,.csv,.txt"
-    >
+<input
+    type="file"
+    id="fileInput"
+    accept=".csv"
+>
 
-    <div id="fileInfo">
-        No file selected
-    </div>
+<div id="fileInfo">
+No file selected
+</div>
+
+<div
+    id="status"
+    class="status">
+</div>
 
 </div>
 
@@ -266,114 +269,267 @@ header p {
 
 <div class="chart-card">
 
-    <div class="chart-title">
+<div class="chart-title">
 
-        <h2>
-            LBSF RWY 27 — ILS CAT III
-        </h2>
+<h2>
+LBSF RWY 27 — ILS CAT III
+</h2>
 
-        <p>
-            Approach from EAST → Touchdown → Rollout to WEST
-        </p>
+<p>
+Approach from EAST → DTHR → touchdown → rollout to WEST
+</p>
 
-    </div>
-
-
-    <div class="chart-wrapper">
-
-        <canvas id="ilsChart"></canvas>
-
-    </div>
+</div>
 
 
-    <div class="direction-row">
+<div class="chart-wrapper">
 
-        <div class="direction-left">
-            ← AFTER TOUCHDOWN / WEST
-        </div>
+<canvas id="ilsChart"></canvas>
 
-        <div class="direction-right">
-            FINAL APPROACH FROM EAST →
-        </div>
-
-    </div>
+</div>
 
 
-    <div class="legend-note">
+<div class="direction-row">
 
-        0 m = ideal ILS localizer centreline.
-        Positive values = right of centreline.
-        Negative values = left of centreline.
+<div class="direction-left">
+← AFTER TOUCHDOWN / WEST
+</div>
 
-    </div>
+<div class="direction-right">
+FINAL APPROACH FROM EAST →
+</div>
+
+</div>
+
+
+<div class="legend-note">
+
+0 m = ideal RWY 27 / ILS localizer centreline.
+Positive lateral deviation = one side of centreline;
+negative deviation = opposite side.
 
 </div>
 
 </div>
 
+</div>
 
 
 <script>
 
-
 /* =========================================================
-   CONFIGURATION
+   LBSF RWY 27 CONFIGURATION
    ========================================================= */
 
-const RUNWAY_LENGTH_NM = 3600 / 1852;
+
+/*
+RWY 27 threshold
+*/
+
+const THR_LAT = 42.695106;
+const THR_LON = 23.439719;
+
+
+/*
+LOC ISF
+*/
+
+const LOC_LAT = 42.697944;
+const LOC_LON = 23.392250;
+
+
+/*
+Runway dimensions
+*/
+
+const RUNWAY_LENGTH_M = 3600;
+
+const RUNWAY_WIDTH_M = 45;
+
+const RUNWAY_HALF_WIDTH =
+    RUNWAY_WIDTH_M / 2;
+
+const RUNWAY_LENGTH_NM =
+    RUNWAY_LENGTH_M / 1852;
+
 
 let currentRange = 5;
 
 
 
 /* =========================================================
-   DEMONSTRATION AIRCRAFT TRACK
-
-   This will later be replaced with real ADS-B data.
-   Aircraft approaches from EAST towards DTHR.
+   BASIC GEOMETRY
    ========================================================= */
 
-const demoTrack = [
 
-    {x:5.0, y:-18},
-    {x:4.7, y:-22},
-    {x:4.4, y:-17},
-    {x:4.1, y:-23},
-    {x:3.8, y:-25},
+function toRadians(deg) {
 
-    {x:3.5, y:-29},
-    {x:3.2, y:-24},
-    {x:2.9, y:-31},
-    {x:2.6, y:-28},
+    return deg * Math.PI / 180;
 
-    {x:2.3, y:-20},
-    {x:2.0, y:-14},
-    {x:1.7, y:-8},
-    {x:1.4, y:-5},
+}
 
-    {x:1.0, y:-2},
-    {x:0.7, y:-3},
-    {x:0.4, y:-1},
 
-    {x:0.0, y:0}
 
-];
+function localXY(lat, lon) {
+
+    /*
+    Local tangent-plane approximation.
+
+    Origin = RWY 27 threshold.
+
+    east  = metres east of threshold
+    north = metres north of threshold
+    */
+
+    const R = 6371000;
+
+    const lat0 =
+        toRadians(THR_LAT);
+
+    const dLat =
+        toRadians(lat - THR_LAT);
+
+    const dLon =
+        toRadians(lon - THR_LON);
+
+
+    const north =
+        dLat * R;
+
+    const east =
+        dLon *
+        R *
+        Math.cos(lat0);
+
+
+    return {
+        east: east,
+        north: north
+    };
+
+}
 
 
 
 /* =========================================================
-   TEMPORARY CAT III VISUAL ENVELOPE
+   CALCULATE TRUE RUNWAY / LOC AXIS
 
-   IMPORTANT:
-   This is currently only a visual model.
-
-   We will replace this with the exact engineering
-   criterion before using it for real analysis.
+   LOC -> THR defines the extended RWY 27 centreline.
+   Positive longitudinal values = approach side EAST.
+   Negative values = runway side WEST.
    ========================================================= */
+
+
+const locXY =
+    localXY(
+        LOC_LAT,
+        LOC_LON
+    );
+
+
+/*
+Vector LOC -> THR
+*/
+
+let axisEast =
+    -locXY.east;
+
+let axisNorth =
+    -locXY.north;
+
+
+const axisLength =
+    Math.sqrt(
+        axisEast * axisEast +
+        axisNorth * axisNorth
+    );
+
+
+axisEast /=
+    axisLength;
+
+axisNorth /=
+    axisLength;
+
+
+/*
+Perpendicular vector.
+
+Used for lateral deviation.
+*/
+
+const lateralEast =
+    -axisNorth;
+
+const lateralNorth =
+    axisEast;
+
+
+
+/* =========================================================
+   CONVERT LAT/LON TO ILS GRAPH COORDINATES
+   ========================================================= */
+
+
+function positionToILS(lat, lon) {
+
+    const p =
+        localXY(lat, lon);
+
+
+    /*
+    Longitudinal distance.
+
+    Positive = EAST / approach
+    Negative = WEST / runway
+    */
+
+    const alongMetres =
+
+        p.east * axisEast +
+
+        p.north * axisNorth;
+
+
+    /*
+    Lateral displacement
+    */
+
+    const lateralMetres =
+
+        p.east * lateralEast +
+
+        p.north * lateralNorth;
+
+
+    return {
+
+        x:
+            alongMetres / 1852,
+
+        y:
+            lateralMetres
+
+    };
+
+}
+
+
+
+/* =========================================================
+   CAT III GEOMETRIC DISPLAY LIMITS
+
+   This follows the visual envelope used in our
+   project example.
+
+   We keep the function isolated so the engineering
+   model can be refined independently later.
+   ========================================================= */
+
 
 function cat3Limit(distanceNM) {
 
-    return 3 + distanceNM * 20;
+    return distanceNM * 22;
 
 }
 
@@ -385,22 +541,29 @@ function makeLimit(sign, range) {
 
     const steps = 100;
 
-    for (let i = 0; i <= steps; i++) {
 
-        const distance =
+    for (
+        let i = 0;
+        i <= steps;
+        i++
+    ) {
+
+        const x =
             range * i / steps;
+
 
         points.push({
 
-            x: distance,
+            x: x,
 
             y:
                 sign *
-                cat3Limit(distance)
+                cat3Limit(x)
 
         });
 
     }
+
 
     return points;
 
@@ -409,231 +572,254 @@ function makeLimit(sign, range) {
 
 
 /* =========================================================
-   RUNWAY DRAWING PLUGIN
+   AIRCRAFT DATA
    ========================================================= */
+
+
+let aircraftTrack = [];
+
+let callsign = '';
+
+let totalCSVPoints = 0;
+
+let usedPoints = 0;
+
+
+
+/* =========================================================
+   RUNWAY DRAWING
+   ========================================================= */
+
 
 const runwayPlugin = {
 
-    id: 'runwayPlugin',
+id: 'runwayPlugin',
 
 
-    beforeDatasetsDraw(chart) {
-
-        const ctx =
-            chart.ctx;
-
-        const x =
-            chart.scales.x;
-
-        const y =
-            chart.scales.y;
+beforeDatasetsDraw(chart) {
 
 
-        const thresholdX =
-            x.getPixelForValue(0);
+    const ctx =
+        chart.ctx;
+
+    const x =
+        chart.scales.x;
+
+    const y =
+        chart.scales.y;
 
 
-        const runwayEndX =
-            x.getPixelForValue(
-                -RUNWAY_LENGTH_NM
-            );
+    const thresholdX =
+        x.getPixelForValue(0);
 
 
-        /*
-        Visual runway width.
-
-        This is deliberately enlarged vertically
-        so that the runway can be clearly seen.
-        */
-
-        const runwayTop =
-            y.getPixelForValue(15);
-
-        const runwayBottom =
-            y.getPixelForValue(-15);
-
-
-        ctx.save();
-
-
-
-        /* -----------------------------------------
-           RUNWAY BODY
-           ----------------------------------------- */
-
-        ctx.fillStyle =
-            '#707070';
-
-        ctx.fillRect(
-
-            runwayEndX,
-
-            runwayTop,
-
-            thresholdX - runwayEndX,
-
-            runwayBottom - runwayTop
-
+    const runwayEndX =
+        x.getPixelForValue(
+            -RUNWAY_LENGTH_NM
         );
 
 
+    /*
+    IMPORTANT:
 
-        /* -----------------------------------------
-           RUNWAY EDGES
-           ----------------------------------------- */
+    Unlike the previous version,
+    runway width is now represented
+    by the real 45 m width.
 
-        ctx.strokeStyle =
-            '#303030';
+    +/-22.5 m around centreline.
+    */
 
-        ctx.lineWidth = 2;
 
-        ctx.strokeRect(
-
-            runwayEndX,
-
-            runwayTop,
-
-            thresholdX - runwayEndX,
-
-            runwayBottom - runwayTop
-
+    const runwayTop =
+        y.getPixelForValue(
+            RUNWAY_HALF_WIDTH
         );
 
 
-
-        /* -----------------------------------------
-           RUNWAY CENTRELINE
-           ----------------------------------------- */
-
-        ctx.strokeStyle =
-            '#ffffff';
-
-        ctx.lineWidth = 2;
-
-        ctx.setLineDash(
-            [14, 10]
+    const runwayBottom =
+        y.getPixelForValue(
+            -RUNWAY_HALF_WIDTH
         );
 
 
-        ctx.beginPath();
-
-
-        ctx.moveTo(
-
-            runwayEndX,
-
-            y.getPixelForValue(0)
-
-        );
-
-
-        ctx.lineTo(
-
-            thresholdX,
-
-            y.getPixelForValue(0)
-
-        );
-
-
-        ctx.stroke();
+    ctx.save();
 
 
 
-        /* -----------------------------------------
-           THRESHOLD
-           ----------------------------------------- */
+    /* RUNWAY BODY */
 
-        ctx.setLineDash([]);
-
-        ctx.strokeStyle =
-            '#101820';
-
-        ctx.lineWidth = 3;
+    ctx.fillStyle =
+        '#777777';
 
 
-        ctx.beginPath();
+    ctx.fillRect(
 
+        runwayEndX,
 
-        ctx.moveTo(
+        runwayTop,
 
-            thresholdX,
+        thresholdX -
+        runwayEndX,
 
-            runwayTop - 10
+        runwayBottom -
+        runwayTop
 
-        );
-
-
-        ctx.lineTo(
-
-            thresholdX,
-
-            runwayBottom + 10
-
-        );
-
-
-        ctx.stroke();
+    );
 
 
 
-        /* -----------------------------------------
-           RWY 27 TEXT
-           ----------------------------------------- */
+    /* RUNWAY EDGES */
 
-        ctx.fillStyle =
-            '#ffffff';
+    ctx.strokeStyle =
+        '#333333';
 
-        ctx.font =
-            'bold 16px Arial';
-
-        ctx.textAlign =
-            'center';
-
-        ctx.textBaseline =
-            'middle';
+    ctx.lineWidth =
+        2;
 
 
-        ctx.fillText(
+    ctx.strokeRect(
 
-            'RWY 27',
+        runwayEndX,
 
-            (
-                runwayEndX +
-                thresholdX
-            ) / 2,
+        runwayTop,
 
-            y.getPixelForValue(0)
+        thresholdX -
+        runwayEndX,
 
-        );
+        runwayBottom -
+        runwayTop
+
+    );
 
 
 
-        /* -----------------------------------------
-           DTHR LABEL
-           ----------------------------------------- */
+    /* RUNWAY CENTRELINE */
 
-        ctx.fillStyle =
-            '#10233f';
+    ctx.strokeStyle =
+        '#ffffff';
 
-        ctx.font =
-            'bold 12px Arial';
+    ctx.lineWidth =
+        2;
 
-
-        ctx.fillText(
-
-            'DTHR',
-
-            thresholdX,
-
-            runwayBottom + 22
-
-        );
+    ctx.setLineDash(
+        [14,10]
+    );
 
 
-        ctx.restore();
+    ctx.beginPath();
 
-    }
+
+    ctx.moveTo(
+
+        runwayEndX,
+
+        y.getPixelForValue(0)
+
+    );
+
+
+    ctx.lineTo(
+
+        thresholdX,
+
+        y.getPixelForValue(0)
+
+    );
+
+
+    ctx.stroke();
+
+
+
+    /* DTHR */
+
+    ctx.setLineDash([]);
+
+    ctx.strokeStyle =
+        '#111827';
+
+    ctx.lineWidth =
+        3;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+
+        thresholdX,
+
+        runwayTop - 12
+
+    );
+
+
+    ctx.lineTo(
+
+        thresholdX,
+
+        runwayBottom + 12
+
+    );
+
+
+    ctx.stroke();
+
+
+
+    /* RWY 27 LABEL */
+
+    ctx.fillStyle =
+        '#ffffff';
+
+    ctx.font =
+        'bold 16px Arial';
+
+    ctx.textAlign =
+        'center';
+
+    ctx.textBaseline =
+        'middle';
+
+
+    ctx.fillText(
+
+        'RWY 27',
+
+        (
+            runwayEndX +
+            thresholdX
+        ) / 2,
+
+        y.getPixelForValue(0)
+
+    );
+
+
+
+    /* DTHR LABEL */
+
+    ctx.fillStyle =
+        '#10233f';
+
+    ctx.font =
+        'bold 12px Arial';
+
+
+    ctx.fillText(
+
+        'DTHR',
+
+        thresholdX,
+
+        runwayBottom + 25
+
+    );
+
+
+    ctx.restore();
+
+}
 
 };
 
@@ -642,6 +828,7 @@ const runwayPlugin = {
 /* =========================================================
    CHART
    ========================================================= */
+
 
 const ctx =
     document.getElementById(
@@ -653,430 +840,959 @@ const chart =
 new Chart(ctx, {
 
 
-    plugins: [
-        runwayPlugin
-    ],
+plugins: [
+    runwayPlugin
+],
 
 
-    type: 'line',
+type: 'line',
 
 
-    data: {
+data: {
 
-        datasets: [
+datasets: [
 
 
-            /* ADS-B TRACK */
+/* REAL ADS-B TRACK */
 
-            {
+{
 
-                label:
-                    'ADS-B aircraft track',
+    label:
+        'ADS-B aircraft track',
 
-                data:
-                    demoTrack,
+    data:
+        aircraftTrack,
 
-                borderColor:
-                    '#0874d1',
+    borderColor:
+        '#0874d1',
 
-                backgroundColor:
-                    '#0874d1',
+    backgroundColor:
+        '#0874d1',
 
-                borderWidth:
-                    2.5,
+    borderWidth:
+        2.5,
 
-                pointRadius:
-                    4,
+    pointRadius:
+        3,
 
-                pointHoverRadius:
-                    6,
+    pointHoverRadius:
+        6,
 
-                tension:
-                    0.15,
+    showLine:
+        true,
 
-                order: 1
+    tension:
+        0,
 
-            },
+    parsing:
+        false,
 
+    order:
+        1
 
+},
 
-            /* CAT III POSITIVE LIMIT */
 
-            {
 
-                label:
-                    'CAT III + limit',
+/* CAT III POSITIVE */
 
-                data:
-                    makeLimit(1,5),
+{
 
-                borderColor:
-                    '#ff7a00',
+    label:
+        'CAT III + limit',
 
-                borderWidth:
-                    2,
+    data:
+        makeLimit(
+            1,
+            5
+        ),
 
-                borderDash:
-                    [8,7],
+    borderColor:
+        '#ff7a00',
 
-                pointRadius:
-                    0,
+    borderWidth:
+        2,
 
-                tension:
-                    0,
+    borderDash:
+        [8,7],
 
-                order: 2
+    pointRadius:
+        0,
 
-            },
+    tension:
+        0,
 
+    parsing:
+        false,
 
+    order:
+        2
 
-            /* CAT III NEGATIVE LIMIT */
+},
 
-            {
 
-                label:
-                    'CAT III - limit',
 
-                data:
-                    makeLimit(-1,5),
+/* CAT III NEGATIVE */
 
-                borderColor:
-                    '#19a44b',
+{
 
-                borderWidth:
-                    2,
+    label:
+        'CAT III - limit',
 
-                borderDash:
-                    [8,7],
+    data:
+        makeLimit(
+            -1,
+            5
+        ),
 
-                pointRadius:
-                    0,
+    borderColor:
+        '#18a448',
 
-                tension:
-                    0,
+    borderWidth:
+        2,
 
-                order: 2
+    borderDash:
+        [8,7],
 
-            }
+    pointRadius:
+        0,
 
+    tension:
+        0,
 
-        ]
+    parsing:
+        false,
 
-    },
+    order:
+        2
 
+}
 
+]
 
-    options: {
+},
 
 
-        responsive:
-            true,
 
+options: {
 
-        maintainAspectRatio:
-            false,
 
+responsive:
+    true,
 
-        parsing:
-            false,
 
+maintainAspectRatio:
+    false,
 
-        interaction: {
 
-            intersect:
-                false,
+animation:
+    false,
 
-            mode:
-                'nearest'
 
-        },
+interaction: {
 
+    intersect:
+        false,
 
+    mode:
+        'nearest'
 
-        plugins: {
+},
 
 
-            legend: {
+plugins: {
 
-                position:
-                    'bottom'
 
-            },
+legend: {
 
+    position:
+        'bottom'
 
-            tooltip: {
+},
 
-                callbacks: {
 
+tooltip: {
 
-                    title:
-                    function(items) {
 
-                        const x =
-                            items[0].parsed.x;
+callbacks: {
 
 
-                        if (x === 0) {
+title:
+function(items) {
 
-                            return 'RWY 27 DTHR';
 
-                        }
+    const x =
+        items[0].parsed.x;
 
 
-                        if (x < 0) {
+    if (
+        Math.abs(x) <
+        0.01
+    ) {
 
-                            return (
-                                Math.abs(x)
-                                .toFixed(2) +
-                                ' NM after threshold'
-                            );
-
-                        }
-
-
-                        return (
-                            x.toFixed(2) +
-                            ' NM from threshold'
-                        );
-
-                    },
-
-
-                    label:
-                    function(context) {
-
-                        return (
-
-                            context.dataset.label +
-
-                            ': ' +
-
-                            context.parsed.y
-                            .toFixed(1) +
-
-                            ' m'
-
-                        );
-
-                    }
-
-
-                }
-
-            }
-
-        },
-
-
-
-        scales: {
-
-
-            x: {
-
-
-                type:
-                    'linear',
-
-
-                min:
-                    -RUNWAY_LENGTH_NM,
-
-
-                max:
-                    5,
-
-
-                title: {
-
-                    display:
-                        true,
-
-                    text:
-                        'Distance relative to RWY 27 threshold'
-
-                },
-
-
-                ticks: {
-
-
-                    callback:
-                    function(value) {
-
-
-                        if (
-                            Math.abs(value) <
-                            0.01
-                        ) {
-
-                            return 'DTHR';
-
-                        }
-
-
-                        if (value < 0) {
-
-                            const km =
-                                Math.abs(value)
-                                * 1.852;
-
-                            return (
-                                km.toFixed(0) +
-                                ' km'
-                            );
-
-                        }
-
-
-                        return (
-                            value +
-                            ' NM'
-                        );
-
-                    }
-
-                },
-
-
-                grid: {
-
-                    color:
-                        '#dce4ec'
-
-                }
-
-            },
-
-
-
-            y: {
-
-
-                min:
-                    -150,
-
-
-                max:
-                    150,
-
-
-                title: {
-
-                    display:
-                        true,
-
-                    text:
-                        'Lateral deviation from ILS centreline [m]'
-
-                },
-
-
-                ticks: {
-
-                    stepSize:
-                        50
-
-                },
-
-
-                grid: {
-
-
-                    color:
-                    function(context) {
-
-                        if (
-                            context.tick.value === 0
-                        ) {
-
-                            return '#203448';
-
-                        }
-
-                        return '#dce4ec';
-
-                    },
-
-
-                    lineWidth:
-                    function(context) {
-
-                        if (
-                            context.tick.value === 0
-                        ) {
-
-                            return 2;
-
-                        }
-
-                        return 1;
-
-                    }
-
-                }
-
-            }
-
-        }
+        return 'RWY 27 DTHR';
 
     }
+
+
+    if (x < 0) {
+
+        return (
+            (
+                Math.abs(x) *
+                1.852
+            )
+            .toFixed(2) +
+
+            ' km after DTHR'
+        );
+
+    }
+
+
+    return (
+        x.toFixed(2) +
+        ' NM from DTHR'
+    );
+
+},
+
+
+label:
+function(context) {
+
+
+    return (
+
+        context.dataset.label +
+
+        ': ' +
+
+        context.parsed.y
+        .toFixed(1) +
+
+        ' m'
+
+    );
+
+}
+
+}
+
+}
+
+},
+
+
+
+scales: {
+
+
+x: {
+
+
+type:
+    'linear',
+
+
+min:
+    -RUNWAY_LENGTH_NM,
+
+
+max:
+    5,
+
+
+title: {
+
+    display:
+        true,
+
+    text:
+        'Distance relative to RWY 27 threshold'
+
+},
+
+
+ticks: {
+
+
+callback:
+function(value) {
+
+
+    if (
+        Math.abs(value) <
+        0.02
+    ) {
+
+        return 'DTHR';
+
+    }
+
+
+    if (value < 0) {
+
+        const km =
+            Math.abs(value) *
+            1.852;
+
+
+        return (
+            km.toFixed(1) +
+            ' km'
+        );
+
+    }
+
+
+    return (
+        value +
+        ' NM'
+    );
+
+}
+
+},
+
+
+grid: {
+
+    color:
+        '#dce4ec'
+
+}
+
+},
+
+
+
+y: {
+
+
+min:
+    -150,
+
+
+max:
+    150,
+
+
+title: {
+
+    display:
+        true,
+
+    text:
+        'Lateral deviation from RWY / ILS centreline [m]'
+
+},
+
+
+ticks: {
+
+    stepSize:
+        50
+
+},
+
+
+grid: {
+
+
+color:
+function(context) {
+
+
+    if (
+        context.tick.value === 0
+    ) {
+
+        return '#203448';
+
+    }
+
+
+    return '#dce4ec';
+
+},
+
+
+lineWidth:
+function(context) {
+
+
+    if (
+        context.tick.value === 0
+    ) {
+
+        return 2;
+
+    }
+
+
+    return 1;
+
+}
+
+}
+
+}
+
+}
+
+}
 
 });
 
 
 
 /* =========================================================
-   5 NM / 10 NM BUTTONS
+   RANGE BUTTONS
    ========================================================= */
+
 
 function setRange(range) {
 
 
-    currentRange =
-        range;
+currentRange =
+    range;
 
 
-    chart.options.scales.x.min =
-        -RUNWAY_LENGTH_NM;
+chart.options.scales.x.min =
+    -RUNWAY_LENGTH_NM;
 
 
-    chart.options.scales.x.max =
-        range;
+chart.options.scales.x.max =
+    range;
 
 
-    chart.data.datasets[1].data =
-        makeLimit(
-            1,
-            range
-        );
-
-
-    chart.data.datasets[2].data =
-        makeLimit(
-            -1,
-            range
-        );
-
-
-    document
-    .getElementById('btn5')
-    .classList.toggle(
-        'active',
-        range === 5
+chart.data.datasets[1].data =
+    makeLimit(
+        1,
+        range
     );
 
 
-    document
-    .getElementById('btn10')
-    .classList.toggle(
-        'active',
-        range === 10
+chart.data.datasets[2].data =
+    makeLimit(
+        -1,
+        range
     );
 
 
-    chart.update();
+document
+.getElementById('btn5')
+.classList.toggle(
+    'active',
+    range === 5
+);
+
+
+document
+.getElementById('btn10')
+.classList.toggle(
+    'active',
+    range === 10
+);
+
+
+chart.update();
+
+}
+
+
+
+document
+.getElementById('btn5')
+.addEventListener(
+    'click',
+    function() {
+
+        setRange(5);
+
+    }
+);
+
+
+document
+.getElementById('btn10')
+.addEventListener(
+    'click',
+    function() {
+
+        setRange(10);
+
+    }
+);
+
+
+
+/* =========================================================
+   SIMPLE CSV PARSER
+   ========================================================= */
+
+
+function parseCSVLine(line) {
+
+
+    const values = [];
+
+    let current = '';
+
+    let insideQuotes = false;
+
+
+    for (
+        let i = 0;
+        i < line.length;
+        i++
+    ) {
+
+
+        const char =
+            line[i];
+
+
+        if (char === '"') {
+
+            insideQuotes =
+                !insideQuotes;
+
+        }
+
+        else if (
+            char === ',' &&
+            !insideQuotes
+        ) {
+
+            values.push(
+                current.trim()
+            );
+
+            current = '';
+
+        }
+
+        else {
+
+            current += char;
+
+        }
+
+    }
+
+
+    values.push(
+        current.trim()
+    );
+
+
+    return values;
+
+}
+
+
+
+/* =========================================================
+   READ CSV
+   ========================================================= */
+
+
+function processCSV(text) {
+
+
+const lines =
+    text
+    .split(/\r?\n/)
+    .filter(
+        line =>
+            line.trim() !== ''
+    );
+
+
+if (
+    lines.length < 2
+) {
+
+    throw new Error(
+        'CSV file is empty.'
+    );
+
+}
+
+
+const headers =
+    parseCSVLine(
+        lines[0]
+    );
+
+
+const positionIndex =
+    headers.indexOf(
+        'Position'
+    );
+
+
+const callsignIndex =
+    headers.indexOf(
+        'Callsign'
+    );
+
+
+const altitudeIndex =
+    headers.indexOf(
+        'Altitude'
+    );
+
+
+const speedIndex =
+    headers.indexOf(
+        'Speed'
+    );
+
+
+const utcIndex =
+    headers.indexOf(
+        'UTC'
+    );
+
+
+if (
+    positionIndex === -1
+) {
+
+    throw new Error(
+        'Position column not found.'
+    );
+
+}
+
+
+
+const track = [];
+
+totalCSVPoints =
+    lines.length - 1;
+
+
+let firstUTC = '';
+
+let lastUTC = '';
+
+let runwayPoints = 0;
+
+let approachPoints = 0;
+
+
+
+for (
+    let i = 1;
+    i < lines.length;
+    i++
+) {
+
+
+    const row =
+        parseCSVLine(
+            lines[i]
+        );
+
+
+    const position =
+        row[positionIndex];
+
+
+    if (!position) {
+        continue;
+    }
+
+
+    const parts =
+        position.split(',');
+
+
+    if (
+        parts.length !== 2
+    ) {
+
+        continue;
+
+    }
+
+
+    const lat =
+        parseFloat(
+            parts[0]
+        );
+
+
+    const lon =
+        parseFloat(
+            parts[1]
+        );
+
+
+    if (
+        !Number.isFinite(lat) ||
+        !Number.isFinite(lon)
+    ) {
+
+        continue;
+
+    }
+
+
+    if (
+        callsignIndex >= 0 &&
+        !callsign
+    ) {
+
+        callsign =
+            row[callsignIndex];
+
+    }
+
+
+    const ils =
+        positionToILS(
+            lat,
+            lon
+        );
+
+
+    /*
+    We only need points relevant to
+    RWY 27 approach and runway.
+
+    APPROACH:
+    0 ... selected range
+
+    RUNWAY:
+    threshold ... western runway end
+
+    We also allow some margin around
+    the runway to preserve the actual
+    ADS-B movement.
+    */
+
+
+    const isApproach =
+
+        ils.x >= 0 &&
+
+        ils.x <= 10 &&
+
+        Math.abs(ils.y) <= 1000;
+
+
+    const isRunwayArea =
+
+        ils.x < 0 &&
+
+        ils.x >=
+            -RUNWAY_LENGTH_NM - 0.15 &&
+
+        Math.abs(ils.y) <= 150;
+
+
+    if (
+        !isApproach &&
+        !isRunwayArea
+    ) {
+
+        continue;
+
+    }
+
+
+    const altitude =
+
+        altitudeIndex >= 0 ?
+
+        parseFloat(
+            row[altitudeIndex]
+        ) :
+
+        null;
+
+
+    const speed =
+
+        speedIndex >= 0 ?
+
+        parseFloat(
+            row[speedIndex]
+        ) :
+
+        null;
+
+
+    const utc =
+
+        utcIndex >= 0 ?
+
+        row[utcIndex] :
+
+        '';
+
+
+    if (!firstUTC) {
+
+        firstUTC =
+            utc;
+
+    }
+
+
+    lastUTC =
+        utc;
+
+
+    if (isApproach) {
+
+        approachPoints++;
+
+    }
+
+
+    if (isRunwayArea) {
+
+        runwayPoints++;
+
+    }
+
+
+    track.push({
+
+        x:
+            ils.x,
+
+        y:
+            ils.y,
+
+        altitude:
+            altitude,
+
+        speed:
+            speed,
+
+        utc:
+            utc,
+
+        lat:
+            lat,
+
+        lon:
+            lon
+
+    });
+
+}
+
+
+
+usedPoints =
+    track.length;
+
+
+if (
+    track.length === 0
+) {
+
+    throw new Error(
+        'No RWY 27 approach points were found.'
+    );
+
+}
+
+
+/*
+IMPORTANT:
+
+Do NOT sort by X.
+
+We preserve chronological CSV order.
+
+This allows the line to show:
+approach → threshold → rollout.
+*/
+
+
+aircraftTrack =
+    track;
+
+
+chart.data.datasets[0].data =
+    aircraftTrack;
+
+
+chart.update();
+
+
+
+/* FILE INFORMATION */
+
+
+const info =
+    document
+    .getElementById(
+        'fileInfo'
+    );
+
+
+info.innerHTML =
+
+    '<strong>Callsign:</strong> ' +
+
+    (
+        callsign ||
+        'Unknown'
+    ) +
+
+    ' &nbsp; | &nbsp; ' +
+
+    '<strong>CSV points:</strong> ' +
+
+    totalCSVPoints +
+
+    ' &nbsp; | &nbsp; ' +
+
+    '<strong>Used:</strong> ' +
+
+    usedPoints +
+
+    '<br>' +
+
+    '<strong>Approach points:</strong> ' +
+
+    approachPoints +
+
+    ' &nbsp; | &nbsp; ' +
+
+    '<strong>Runway / rollout points:</strong> ' +
+
+    runwayPoints +
+
+    '<br>' +
+
+    '<strong>Time:</strong> ' +
+
+    firstUTC +
+
+    ' → ' +
+
+    lastUTC;
+
+
+
+document
+.getElementById(
+    'status'
+)
+.textContent =
+
+    '✓ Flight trajectory loaded successfully';
 
 }
 
@@ -1086,45 +1802,97 @@ function setRange(range) {
    FILE INPUT
    ========================================================= */
 
+
 document
-.getElementById('fileInput')
+.getElementById(
+    'fileInput'
+)
 .addEventListener(
 'change',
 function(event) {
 
 
-    const file =
-        event.target.files[0];
+const file =
+    event.target.files[0];
 
 
-    if (!file) {
+if (!file) {
 
-        return;
+    return;
+
+}
+
+
+document
+.getElementById(
+    'status'
+)
+.textContent =
+    'Reading file...';
+
+
+callsign = '';
+
+aircraftTrack = [];
+
+
+const reader =
+    new FileReader();
+
+
+reader.onload =
+function(e) {
+
+
+    try {
+
+
+        processCSV(
+            e.target.result
+        );
+
 
     }
 
+    catch(error) {
 
-    const sizeKB =
-        (
-            file.size /
-            1024
+
+        document
+        .getElementById(
+            'status'
         )
-        .toFixed(1);
+        .textContent =
+
+            'Error: ' +
+            error.message;
+
+
+        console.error(
+            error
+        );
+
+    }
+
+};
+
+
+reader.onerror =
+function() {
 
 
     document
-    .getElementById('fileInfo')
-    .innerHTML =
+    .getElementById(
+        'status'
+    )
+    .textContent =
+        'Could not read file.';
 
-        '<strong>Selected:</strong> ' +
+};
 
-        file.name +
 
-        ' &nbsp; | &nbsp; ' +
-
-        sizeKB +
-
-        ' KB';
+reader.readAsText(
+    file
+);
 
 
 });
