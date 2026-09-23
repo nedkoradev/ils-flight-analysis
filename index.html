@@ -4,51 +4,160 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>ILS Flight Analysis – LBSF</title>
+<title>ILS Flight Analysis</title>
 
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7"></script>
 
 <style>
-html, body {
+* {
+    box-sizing: border-box;
+}
+
+body {
     margin: 0;
-    padding: 0;
-    background: #07111f;
-    color: white;
     font-family: Arial, sans-serif;
+    background: #f4f7fb;
+    color: #10233f;
 }
 
 header {
-    background: #0d2238;
+    background: #0c2138;
+    color: white;
+    padding: 24px;
     text-align: center;
-    padding: 18px;
 }
 
 header h1 {
     margin: 0;
-    font-size: 28px;
+    font-size: 30px;
 }
 
 header p {
-    margin: 7px 0 0;
-    color: #b9ccdc;
+    margin: 8px 0 0;
+    color: #bdd0e2;
 }
 
-#map {
-    width: 100%;
-    height: 65vh;
+.container {
+    max-width: 1400px;
+    margin: auto;
+    padding: 24px;
 }
 
-.panel {
-    margin: 14px;
-    padding: 18px;
-    background: #102338;
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.runway-info {
+    background: white;
     border-radius: 12px;
+    padding: 16px 22px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
 }
 
-.value {
-    color: #5ed6ff;
+.runway-info strong {
+    color: #0066cc;
+}
+
+.cat {
+    display: inline-block;
+    margin-left: 10px;
+    background: #143b66;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
     font-weight: bold;
+}
+
+.view-buttons button {
+    padding: 10px 20px;
+    border: 1px solid #b9c7d6;
+    background: white;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.view-buttons button.active {
+    background: #0874d1;
+    color: white;
+    border-color: #0874d1;
+}
+
+.upload-box {
+    background: white;
+    border: 2px dashed #8ba7c4;
+    border-radius: 14px;
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.upload-box h2 {
+    margin-top: 0;
+}
+
+.upload-box input {
+    margin-top: 12px;
+}
+
+#fileInfo {
+    margin-top: 14px;
+    color: #52677c;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.chart-title {
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.chart-title h2 {
+    margin: 0;
+}
+
+.chart-title p {
+    margin: 6px;
+    color: #586b7f;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 560px;
+}
+
+.legend-note {
+    margin-top: 15px;
+    padding: 12px;
+    background: #f3f6fa;
+    border-radius: 8px;
+    text-align: center;
+    color: #52677c;
+    font-size: 14px;
+}
+
+.direction {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 55px 0 70px;
+    font-weight: bold;
+    color: #314c68;
+}
+
+@media(max-width:700px) {
+    .chart-wrapper {
+        height: 430px;
+    }
 }
 </style>
 </head>
@@ -57,210 +166,390 @@ header p {
 
 <header>
     <h1>ILS Flight Analysis</h1>
-    <p>LBSF Sofia Airport – RWY 27</p>
+    <p>ADS-B trajectory analysis against ILS localizer reference</p>
 </header>
 
-<div id="map"></div>
+<div class="container">
 
-<div class="panel">
-    <h2>ILS RWY 27 – ISF</h2>
+    <div class="topbar">
 
-    <p>LOC: <span class="value">109.5 MHz</span></p>
-    <p>GP: <span class="value">332.6 MHz / 3.0°</span></p>
-    <p>DME: <span class="value">CH 32X</span></p>
+        <div class="runway-info">
+            Airport:
+            <strong>LBSF Sofia</strong>
+
+            &nbsp; | &nbsp;
+
+            Runway:
+            <strong>27</strong>
+
+            <span class="cat">CAT III</span>
+        </div>
+
+        <div class="view-buttons">
+            <button id="btn5" class="active"
+                    onclick="setRange(5)">
+                5 NM
+            </button>
+
+            <button id="btn10"
+                    onclick="setRange(10)">
+                10 NM
+            </button>
+        </div>
+
+    </div>
+
+
+    <div class="upload-box">
+
+        <h2>Load ADS-B flight data</h2>
+
+        <p>
+            Select the ADS-B file containing the aircraft trajectory.
+        </p>
+
+        <input
+            type="file"
+            id="fileInput"
+            accept=".json,.csv,.txt"
+        >
+
+        <div id="fileInfo">
+            No file selected
+        </div>
+
+    </div>
+
+
+    <div class="chart-card">
+
+        <div class="chart-title">
+            <h2>LBSF RWY 27 — ILS CAT III</h2>
+
+            <p>
+                Final approach from EAST → touchdown → rollout to WEST
+            </p>
+        </div>
+
+        <div class="chart-wrapper">
+            <canvas id="ilsChart"></canvas>
+        </div>
+
+        <div class="direction">
+            <span>← WEST / AFTER TOUCHDOWN</span>
+            <span>FINAL APPROACH / EAST →</span>
+        </div>
+
+        <div class="legend-note">
+            0 m = ideal ILS localizer centreline.
+            Positive values = right of centreline.
+            Negative values = left of centreline.
+        </div>
+
+    </div>
+
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
-const map = L.map('map').setView([42.695, 23.430], 14);
+/*
+------------------------------------------------
+DEMO ADS-B DATA
+Later this will be replaced with the real file.
+------------------------------------------------
+*/
 
-L.tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-    }
-).addTo(map);
+const demoTrack = [
 
+    {x: 5.0, y: -18},
+    {x: 4.7, y: -22},
+    {x: 4.4, y: -17},
+    {x: 4.1, y: -23},
+    {x: 3.8, y: -25},
+    {x: 3.5, y: -29},
+    {x: 3.2, y: -24},
+    {x: 2.9, y: -31},
+    {x: 2.6, y: -28},
+    {x: 2.3, y: -20},
+    {x: 2.0, y: -14},
+    {x: 1.7, y: -8},
+    {x: 1.4, y: -5},
+    {x: 1.0, y: -2},
+    {x: 0.7, y: -3},
+    {x: 0.4, y: -1},
+    {x: 0.0, y: 0}
 
-/* LOC ISF */
-const LOC = [
-    42.697944,
-    23.392250
 ];
 
 
-/* GP / DME */
-const GP = [
-    42.696417,
-    23.435806
-];
+/*
+------------------------------------------------
+CAT III REFERENCE ENVELOPE
 
+For now the visual geometry follows the
+reference concept from our analysis.
+We keep it isolated here so it can later
+be replaced by the exact engineering model.
+------------------------------------------------
+*/
 
-/* RWY 27 threshold */
-const THR27 = [
-    42.695106,
-    23.439719
-];
+function cat3Limit(distanceNM) {
 
+    /*
+    At threshold/reference datum:
+    +/- 3 m
 
-/* LOC */
+    Visual envelope increases with distance.
+    */
 
-L.circleMarker(LOC, {
-    radius: 9,
-    color: 'red',
-    fillColor: 'red',
-    fillOpacity: 1
-})
-.addTo(map)
-.bindTooltip('LOC ISF', {
-    permanent: true,
-    direction: 'top'
-});
-
-
-/* GP / DME */
-
-L.circleMarker(GP, {
-    radius: 9,
-    color: 'purple',
-    fillColor: 'purple',
-    fillOpacity: 1
-})
-.addTo(map)
-.bindTooltip('GP / DME', {
-    permanent: true,
-    direction: 'top'
-});
-
-
-/* RWY 27 threshold */
-
-L.circleMarker(THR27, {
-    radius: 9,
-    color: 'black',
-    weight: 2,
-    fillColor: 'white',
-    fillOpacity: 1
-})
-.addTo(map)
-.bindTooltip('RWY 27 THR', {
-    permanent: true,
-    direction: 'right'
-});
-
-
-/* LOC axis to threshold */
-
-L.polyline([LOC, THR27], {
-    color: '#00e5ff',
-    weight: 4
-}).addTo(map);
-/* Calculate bearing LOC -> RWY 27 threshold */
-
-function getBearing(a, b) {
-
-    const lat1 = a[0] * Math.PI / 180;
-    const lat2 = b[0] * Math.PI / 180;
-    const dLon = (b[1] - a[1]) * Math.PI / 180;
-
-    const y = Math.sin(dLon) * Math.cos(lat2);
-
-    const x =
-        Math.cos(lat1) * Math.sin(lat2) -
-        Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-
-    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+    return 3 + (distanceNM * 20);
 }
 
 
-/* Calculate point at distance and bearing */
+function makeLimit(sign, range) {
 
-function destination(point, bearing, distanceNM) {
+    const points = [];
 
-    const R = 6371000;
-    const distance = distanceNM * 1852;
+    const steps = 50;
 
-    const lat1 = point[0] * Math.PI / 180;
-    const lon1 = point[1] * Math.PI / 180;
-    const brng = bearing * Math.PI / 180;
+    for (let i = 0; i <= steps; i++) {
 
-    const lat2 = Math.asin(
-        Math.sin(lat1) * Math.cos(distance / R) +
-        Math.cos(lat1) * Math.sin(distance / R) *
-        Math.cos(brng)
-    );
+        const x = range * i / steps;
 
-    const lon2 = lon1 + Math.atan2(
-        Math.sin(brng) * Math.sin(distance / R) *
-        Math.cos(lat1),
-        Math.cos(distance / R) -
-        Math.sin(lat1) * Math.sin(lat2)
-    );
+        points.push({
+            x: x,
+            y: sign * cat3Limit(x)
+        });
+    }
 
-    return [
-        lat2 * 180 / Math.PI,
-        lon2 * 180 / Math.PI
-    ];
+    return points;
 }
 
 
-/* LOC centreline extended to 25 NM */
+/*
+------------------------------------------------
+CHART
+------------------------------------------------
+*/
 
-const LOC_BEARING = getBearing(LOC, THR27);
+const ctx =
+    document.getElementById('ilsChart');
 
-const CENTER_25NM =
-    destination(LOC, LOC_BEARING, 25);
 
-L.polyline(
-    [LOC, CENTER_25NM],
-    {
-        color: '#00e5ff',
-        weight: 3,
-        dashArray: '10, 8'
+let currentRange = 5;
+
+
+const chart = new Chart(ctx, {
+
+    type: 'line',
+
+    data: {
+
+        datasets: [
+
+            {
+                label: 'ADS-B aircraft track',
+                data: demoTrack,
+                borderColor: '#0874d1',
+                backgroundColor: '#0874d1',
+                borderWidth: 2.5,
+                pointRadius: 4,
+                tension: 0.15
+            },
+
+            {
+                label: 'CAT III + limit',
+                data: makeLimit(1, 5),
+                borderColor: '#ff7a00',
+                borderWidth: 2,
+                borderDash: [8, 7],
+                pointRadius: 0
+            },
+
+            {
+                label: 'CAT III - limit',
+                data: makeLimit(-1, 5),
+                borderColor: '#19a44b',
+                borderWidth: 2,
+                borderDash: [8, 7],
+                pointRadius: 0
+            }
+
+        ]
+    },
+
+    options: {
+
+        responsive: true,
+        maintainAspectRatio: false,
+
+        parsing: false,
+
+        plugins: {
+
+            legend: {
+                position: 'bottom'
+            },
+
+            tooltip: {
+
+                callbacks: {
+
+                    label: function(context) {
+
+                        return (
+                            context.dataset.label +
+                            ': ' +
+                            context.parsed.y.toFixed(1) +
+                            ' m'
+                        );
+                    }
+
+                }
+
+            }
+
+        },
+
+        scales: {
+
+            x: {
+
+                type: 'linear',
+
+                min: 0,
+                max: 5,
+
+                title: {
+                    display: true,
+                    text: 'Distance from RWY 27 threshold [NM]'
+                },
+
+                ticks: {
+
+                    callback: function(value) {
+
+                        if (value === 0) {
+                            return 'DTHR';
+                        }
+
+                        return value + ' NM';
+                    }
+
+                },
+
+                grid: {
+                    color: '#dce4ec'
+                }
+
+            },
+
+            y: {
+
+                min: -150,
+                max: 150,
+
+                title: {
+                    display: true,
+                    text: 'Lateral deviation from ILS centreline [m]'
+                },
+
+                grid: {
+                    color: function(context) {
+
+                        if (context.tick.value === 0) {
+                            return '#26384a';
+                        }
+
+                        return '#dce4ec';
+                    },
+
+                    lineWidth: function(context) {
+
+                        if (context.tick.value === 0) {
+                            return 2;
+                        }
+
+                        return 1;
+                    }
+
+                }
+
+            }
+
+        }
+
     }
-)
-.addTo(map);
-    /* ILS LOC coverage: +/-10 degrees to 25 NM */
 
-const LEFT_10_25 =
-    destination(LOC, LOC_BEARING - 10, 25);
+});
 
-const RIGHT_10_25 =
-    destination(LOC, LOC_BEARING + 10, 25);
 
-L.polygon(
-    [
-        LOC,
-        LEFT_10_25,
-        CENTER_25NM,
-        RIGHT_10_25
-    ],
-    {
-        color: '#00cc66',
-        weight: 2,
-        fillColor: '#00ff88',
-        fillOpacity: 0.15
+/*
+------------------------------------------------
+5 NM / 10 NM
+------------------------------------------------
+*/
+
+function setRange(range) {
+
+    currentRange = range;
+
+    chart.options.scales.x.max = range;
+
+    chart.data.datasets[1].data =
+        makeLimit(1, range);
+
+    chart.data.datasets[2].data =
+        makeLimit(-1, range);
+
+    document
+        .getElementById('btn5')
+        .classList.toggle(
+            'active',
+            range === 5
+        );
+
+    document
+        .getElementById('btn10')
+        .classList.toggle(
+            'active',
+            range === 10
+        );
+
+    chart.update();
+}
+
+
+/*
+------------------------------------------------
+FILE INPUT
+------------------------------------------------
+*/
+
+document
+.getElementById('fileInput')
+.addEventListener('change', function(event) {
+
+    const file =
+        event.target.files[0];
+
+    if (!file) {
+        return;
     }
-)
-.addTo(map)
-.bindPopup('ICAO LOC coverage: +/-10 deg to 25 NM');
 
-/* Show all three points */
+    const sizeKB =
+        (file.size / 1024).toFixed(1);
 
-const bounds = L.latLngBounds([
-    LOC,
-    GP,
-    THR27,
-    CENTER_25NM,
-    LEFT_10_25,
-    RIGHT_10_25
-]);
+    document
+        .getElementById('fileInfo')
+        .innerHTML =
+        '<strong>Selected:</strong> ' +
+        file.name +
+        ' &nbsp; | &nbsp; ' +
+        sizeKB +
+        ' KB';
 
-map.fitBounds(bounds, {
-    padding: [40, 40]
 });
 
 </script>
