@@ -175,7 +175,6 @@ header p{
 
 @media(max-width:700px){
     .chart-wrapper{height:450px}
-
     .direction-row{
         margin-left:40px;
         margin-right:15px;
@@ -197,7 +196,6 @@ header p{
 <div class="topbar">
 
 <div class="runway-info">
-
 Airport:
 <strong id="airportLabel">waiting for flight data...</strong>
 
@@ -207,7 +205,6 @@ Runway:
 <strong id="runwayLabel">--</strong>
 
 <span class="cat" id="catLabel">--</span>
-
 </div>
 
 <div class="view-buttons">
@@ -217,33 +214,24 @@ Runway:
 
 </div>
 
-
 <div class="upload-box">
 
 <h2>Load ADS-B flight data</h2>
 
-<p>
-Select a CSV file. Airport and landing runway will be detected automatically.
-</p>
+<p>Select a CSV file. Airport and landing runway will be detected automatically.</p>
 
 <input type="file" id="fileInput" accept=".csv">
 
-<div id="fileInfo">
-No file selected
-</div>
-
+<div id="fileInfo">No file selected</div>
 <div id="status" class="status"></div>
 
 </div>
-
 
 <div class="chart-card">
 
 <div class="chart-title">
 
-<h2 id="chartTitle">
-Waiting for ADS-B flight
-</h2>
+<h2 id="chartTitle">Waiting for ADS-B flight</h2>
 
 <p id="chartSubtitle">
 Load a CSV file to begin automatic runway detection.
@@ -274,7 +262,6 @@ FINAL APPROACH →
 </div>
 </div>
 
-
 <script>
 
 /* =========================================================
@@ -283,7 +270,7 @@ FINAL APPROACH →
 
 const RUNWAYS = [
 
-/* ==================== SOFIA ==================== */
+/* SOFIA */
 
 {
     airport:"LBSF",
@@ -322,16 +309,11 @@ const RUNWAYS = [
     category:"CAT III",
     frequency:"109.5",
 
-    /*
-    LOC ISF antenna
-    */
-
     locLat:42.697944,
     locLon:23.392250
 },
 
-
-/* ==================== PLOVDIV ==================== */
+/* PLOVDIV */
 
 {
     airport:"LBPD",
@@ -371,8 +353,7 @@ const RUNWAYS = [
     frequency:"109.9"
 },
 
-
-/* ==================== VARNA ==================== */
+/* VARNA */
 
 {
     airport:"LBWN",
@@ -412,8 +393,7 @@ const RUNWAYS = [
     frequency:null
 },
 
-
-/* ==================== BURGAS ==================== */
+/* BURGAS */
 
 {
     airport:"LBBG",
@@ -461,13 +441,9 @@ const RUNWAYS = [
    ========================================================= */
 
 let currentRange=5;
-
 let detectedRunway=null;
-
 let aircraftTrack=[];
-
 let rawFlightPoints=[];
-
 let chart=null;
 
 
@@ -492,7 +468,6 @@ function normalizeHeading(h){
 
     return h;
 }
-
 
 function headingDifference(a,b){
 
@@ -560,15 +535,13 @@ function bearing(lat1,lon1,lat2,lon2){
         Math.cos(dl);
 
     return normalizeHeading(
-        deg(
-            Math.atan2(y,x)
-        )
+        deg(Math.atan2(y,x))
     );
 }
 
 
 /* =========================================================
-   RUNWAY COURSE
+   RUNWAY TRUE COURSE
    ========================================================= */
 
 function runwayCourse(rwy){
@@ -583,7 +556,7 @@ function runwayCourse(rwy){
 
 
 /* =========================================================
-   LOCAL COORDINATES
+   LOCAL EAST / NORTH
    ========================================================= */
 
 function localXY(lat,lon,rwy){
@@ -611,11 +584,14 @@ function localXY(lat,lon,rwy){
 /* =========================================================
    PROJECT POINT ON RUNWAY AXIS
 
-   x > 0 = before threshold
-   x = 0 = threshold
-   x < 0 = runway / after threshold
+   X:
+       x > 0 = FINAL APPROACH
+       x = 0 = THRESHOLD
+       x < 0 = AFTER THRESHOLD
 
-   y = lateral displacement
+   Y:
+       y > 0 = RIGHT of landing course
+       y < 0 = LEFT of landing course
    ========================================================= */
 
 function positionToRunway(lat,lon,rwy){
@@ -633,12 +609,16 @@ function positionToRunway(lat,lon,rwy){
         );
 
 
+    /* Aircraft direction along runway */
+
     const landingEast=
         Math.sin(course);
 
     const landingNorth=
         Math.cos(course);
 
+
+    /* Positive X points outward along final */
 
     const approachEast=
         -landingEast;
@@ -652,11 +632,18 @@ function positionToRunway(lat,lon,rwy){
         p.north*approachNorth;
 
 
+    /*
+       CORRECT RIGHT-HAND VECTOR
+
+       +Y = RIGHT of aircraft
+       -Y = LEFT of aircraft
+    */
+
     const rightEast=
-        landingNorth;
+        -landingNorth;
 
     const rightNorth=
-        -landingEast;
+        landingEast;
 
 
     const lateral=
@@ -715,13 +702,13 @@ function parseCSVLine(line){
             current+=c;
 
         }
+
     }
 
 
     values.push(
         current.trim()
     );
-
 
     return values;
 }
@@ -796,7 +783,6 @@ function readFlightCSV(text){
         const pos=
             row[idxPosition];
 
-
         if(!pos)
             continue;
 
@@ -804,20 +790,15 @@ function readFlightCSV(text){
         const parts=
             pos.split(",");
 
-
         if(parts.length!==2)
             continue;
 
 
         const lat=
-            parseFloat(
-                parts[0]
-            );
+            parseFloat(parts[0]);
 
         const lon=
-            parseFloat(
-                parts[1]
-            );
+            parseFloat(parts[1]);
 
 
         if(
@@ -834,33 +815,27 @@ function readFlightCSV(text){
 
             direction:
                 idxDirection>=0 ?
-                parseFloat(
-                    row[idxDirection]
-                ):
+                parseFloat(row[idxDirection]) :
                 null,
 
             altitude:
                 idxAltitude>=0 ?
-                parseFloat(
-                    row[idxAltitude]
-                ):
+                parseFloat(row[idxAltitude]) :
                 null,
 
             speed:
                 idxSpeed>=0 ?
-                parseFloat(
-                    row[idxSpeed]
-                ):
+                parseFloat(row[idxSpeed]) :
                 null,
 
             callsign:
                 idxCallsign>=0 ?
-                row[idxCallsign]:
+                row[idxCallsign] :
                 "",
 
             utc:
                 idxUTC>=0 ?
-                row[idxUTC]:
+                row[idxUTC] :
                 ""
 
         });
@@ -892,13 +867,10 @@ function evaluateRunway(rwy,points){
         Infinity;
 
     let alignedCount=0;
-
     let finalCount=0;
-
     let afterThresholdCount=0;
 
     let headingPenalty=0;
-
     let headingSamples=0;
 
     let bestFinalDistance=
@@ -961,8 +933,7 @@ function evaluateRunway(rwy,points){
                     );
 
 
-                headingPenalty+=
-                    diff;
+                headingPenalty+=diff;
 
                 headingSamples++;
 
@@ -989,10 +960,7 @@ function evaluateRunway(rwy,points){
     }
 
 
-    if(
-        minThresholdDistance>
-        10000
-    ){
+    if(minThresholdDistance>10000){
 
         return {
             score:Infinity
@@ -1003,8 +971,7 @@ function evaluateRunway(rwy,points){
 
     const avgHeadingDiff=
         headingSamples ?
-        headingPenalty/
-        headingSamples :
+        headingPenalty/headingSamples :
         180;
 
 
@@ -1045,15 +1012,10 @@ function evaluateRunway(rwy,points){
     return {
 
         score,
-
         minThresholdDistance,
-
         avgHeadingDiff,
-
         alignedCount,
-
         finalCount,
-
         afterThresholdCount
 
     };
@@ -1067,7 +1029,6 @@ function evaluateRunway(rwy,points){
 function detectRunway(points){
 
     let best=null;
-
     let bestEvaluation=null;
 
 
@@ -1087,7 +1048,6 @@ function detectRunway(points){
         ){
 
             best=rwy;
-
             bestEvaluation=result;
 
         }
@@ -1110,9 +1070,7 @@ function detectRunway(points){
     return {
 
         runway:best,
-
-        evaluation:
-            bestEvaluation
+        evaluation:bestEvaluation
 
     };
 }
@@ -1180,7 +1138,7 @@ function buildTrack(points,rwy){
         return [];
 
 
-    let start=
+    const start=
         candidates[0];
 
 
@@ -1238,11 +1196,8 @@ function buildTrack(points,rwy){
                     result.push({
 
                         x:q.x,
-
                         y:q.y,
-
                         source:p,
-
                         phase:"approach"
 
                     });
@@ -1265,11 +1220,8 @@ function buildTrack(points,rwy){
                 result.push({
 
                     x:q.x,
-
                     y:q.y,
-
                     source:p,
-
                     phase:"rollout"
 
                 });
@@ -1286,25 +1238,8 @@ function buildTrack(points,rwy){
 
 
 /* =========================================================
-   ILS COURSE ALIGNMENT REFERENCE
-   =========================================================
-
-   CAT III:
-       LOC antenna = 0 m
-       THR         = +/- 3.0 m
-
-   CAT II:
-       LOC antenna = 0 m
-       THR         = +/- 7.5 m
-
-   CAT I:
-       LOC antenna = 0 m
-       THR         = +/- 10.5 m
-
-   The same straight lines continue from the LOC
-   through the threshold toward final approach.
+   ILS ALIGNMENT REFERENCE
    ========================================================= */
-
 
 function thresholdAlignmentLimit(category){
 
@@ -1322,14 +1257,14 @@ function thresholdAlignmentLimit(category){
 
 
 /* =========================================================
-   LOC -> THR DISTANCE
+   LOC -> THRESHOLD DISTANCE
    ========================================================= */
 
 function getLocToThresholdDistance(rwy){
 
     /*
-    Best case:
-    use actual LOC antenna coordinates.
+       Use actual LOC antenna position
+       whenever it exists in the database.
     */
 
     if(
@@ -1364,11 +1299,8 @@ function getLocToThresholdDistance(rwy){
 
 
     /*
-    Temporary fallback for ILS runways
-    whose LOC coordinates have not yet
-    been entered.
-
-    Approximate LOC at far runway end.
+       Temporary fallback until the exact
+       LOC antenna coordinates are entered.
     */
 
     return rwy.length;
@@ -1378,17 +1310,15 @@ function getLocToThresholdDistance(rwy){
 /* =========================================================
    ALIGNMENT LIMIT
 
-             LOC
-              0
-             / \
-            /   \
-           /     \
-        -T   THR   +T
-         \         /
-          \       /
-           FINAL
+   LOC antenna = 0 m
 
-   x = distance BEFORE threshold.
+   THR:
+   CAT I   = +/- 10.5 m
+   CAT II  = +/- 7.5 m
+   CAT III = +/- 3.0 m
+
+   The straight line continues outward
+   along the final approach.
    ========================================================= */
 
 function alignmentLimit(
@@ -1413,15 +1343,8 @@ function alignmentLimit(
 
 
     const x=
-        distanceNM*
-        1852;
+        distanceNM*1852;
 
-
-    /*
-           L + x
-    T  ×  -----
-             L
-    */
 
     return T*
         (L+x)/
@@ -1430,7 +1353,7 @@ function alignmentLimit(
 
 
 /* =========================================================
-   GENERATE REFERENCE LINES
+   GENERATE +/- ILS LINES
    ========================================================= */
 
 function makeLimit(
@@ -1475,7 +1398,6 @@ function makeLimit(
         data.push({
 
             x:x,
-
             y:sign*limit
 
         });
@@ -1488,7 +1410,7 @@ function makeLimit(
 
 
 /* =========================================================
-   RUNWAY DRAWING
+   RUNWAY DRAWING PLUGIN
    ========================================================= */
 
 const runwayPlugin={
@@ -1559,7 +1481,6 @@ beforeDatasetsDraw(chart){
 
 
     ctx.strokeStyle="#333";
-
     ctx.lineWidth=2;
 
     ctx.strokeRect(
@@ -1573,7 +1494,6 @@ beforeDatasetsDraw(chart){
     /* RUNWAY CENTRELINE */
 
     ctx.strokeStyle="#fff";
-
     ctx.lineWidth=2;
 
     ctx.setLineDash(
@@ -1601,7 +1521,6 @@ beforeDatasetsDraw(chart){
     ctx.setLineDash([]);
 
     ctx.strokeStyle="#111827";
-
     ctx.lineWidth=3;
 
 
@@ -1620,7 +1539,7 @@ beforeDatasetsDraw(chart){
     ctx.stroke();
 
 
-    /* RUNWAY LABEL */
+    /* RUNWAY NUMBER */
 
     ctx.fillStyle="#fff";
 
@@ -1647,7 +1566,7 @@ beforeDatasetsDraw(chart){
     );
 
 
-    /* DTHR */
+    /* DTHR LABEL */
 
     ctx.fillStyle=
         "#10233f";
@@ -1658,9 +1577,7 @@ beforeDatasetsDraw(chart){
 
     ctx.fillText(
         "DTHR",
-
         thresholdX,
-
         bottom+25
     );
 
@@ -1703,17 +1620,14 @@ datasets:[
     data:[],
 
     borderColor:"#0874d1",
-
     backgroundColor:"#0874d1",
 
     borderWidth:2.5,
 
     pointRadius:3.5,
-
     pointHoverRadius:6,
 
     showLine:true,
-
     tension:0,
 
     order:1
@@ -1727,7 +1641,6 @@ datasets:[
     borderColor:"#ff7a00",
 
     borderWidth:2,
-
     borderDash:[8,7],
 
     pointRadius:0,
@@ -1745,7 +1658,6 @@ datasets:[
     borderColor:"#18a448",
 
     borderWidth:2,
-
     borderDash:[8,7],
 
     pointRadius:0,
@@ -1762,20 +1674,15 @@ datasets:[
 options:{
 
 responsive:true,
-
 maintainAspectRatio:false,
-
 animation:false,
-
 
 interaction:{
 
     intersect:false,
-
     mode:"nearest"
 
 },
-
 
 plugins:{
 
@@ -1793,9 +1700,7 @@ title(items){
         items[0].parsed.x;
 
 
-    if(
-        Math.abs(x)<.01
-    )
+    if(Math.abs(x)<.01)
         return "Threshold";
 
 
@@ -1815,8 +1720,8 @@ title(items){
         x.toFixed(2)+
         " NM before threshold"
     );
-},
 
+},
 
 label(context){
 
@@ -1884,7 +1789,6 @@ x:{
 type:"linear",
 
 min:-2,
-
 max:5,
 
 title:{
@@ -1900,9 +1804,7 @@ ticks:{
 
 callback(value){
 
-    if(
-        Math.abs(value)<.02
-    )
+    if(Math.abs(value)<.02)
         return "DTHR";
 
 
@@ -1934,7 +1836,6 @@ grid:{
 y:{
 
 min:-150,
-
 max:150,
 
 title:{
@@ -1942,7 +1843,7 @@ title:{
     display:true,
 
     text:
-    "Lateral deviation from runway / ILS centreline [m]"
+    "Lateral deviation: + RIGHT / - LEFT of landing course [m]"
 
 },
 
@@ -2022,9 +1923,7 @@ function updateDisplay(){
         );
 
 
-    if(
-        detectedRunway.ils
-    ){
+    if(detectedRunway.ils){
 
         cat.textContent=
             detectedRunway.category;
@@ -2083,16 +1982,10 @@ function updateDisplay(){
         "°";
 
 
-    /*
-    INFO ABOUT ALIGNMENT GEOMETRY
-    */
-
     let referenceText="";
 
 
-    if(
-        detectedRunway.ils
-    ){
+    if(detectedRunway.ils){
 
         const T=
             thresholdAlignmentLimit(
@@ -2134,9 +2027,7 @@ function updateDisplay(){
     )
     .textContent=
 
-        "0 m = detected RWY "+
-        detectedRunway.runway+
-        " centreline. "+
+        "+Y = RIGHT / -Y = LEFT of landing course. "+
         referenceText;
 
 
@@ -2177,7 +2068,7 @@ function updateDisplay(){
 
 
 /* =========================================================
-   RANGE
+   RANGE BUTTONS
    ========================================================= */
 
 function setRange(range){
@@ -2261,7 +2152,6 @@ function processCSV(
         chart.data.datasets[0].data=[];
         chart.data.datasets[1].data=[];
         chart.data.datasets[2].data=[];
-
 
         chart.update();
 
@@ -2414,9 +2304,7 @@ function processCSV(
         );
 
 
-    if(
-        detectedRunway.ils
-    ){
+    if(detectedRunway.ils){
 
         status.className=
             "status success";
@@ -2508,9 +2396,7 @@ function(event){
 
         catch(error){
 
-            console.error(
-                error
-            );
+            console.error(error);
 
 
             status.className=
