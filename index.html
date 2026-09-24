@@ -23,11 +23,11 @@ const RUNWAYS=[
 {airport:"LBSF",city:"Sofia",runway:"09",lat:42.697514,lon:23.399583,oppositeLat:42.695106,oppositeLon:23.439719,length:3600,width:45,ils:true,category:"CAT I",frequency:"110.7",gpAngle:3.0,thrElevFt:1739,tchFt:50},
 {airport:"LBSF",city:"Sofia",runway:"27",lat:42.695106,lon:23.439719,oppositeLat:42.697514,oppositeLon:23.399583,length:3600,width:45,ils:true,category:"CAT III",frequency:"109.5",locLat:42.697944,locLon:23.392250,gpAngle:3.0,thrElevFt:1745,tchFt:50},
 {airport:"LBPD",city:"Plovdiv",runway:"12",lat:42.074631,lon:24.838850,oppositeLat:42.061006,oppositeLon:24.862908,length:2500,width:45,ils:false,category:null,frequency:null},
-{airport:"LBPD",city:"Plovdiv",runway:"30",lat:42.061006,lon:24.862908,oppositeLat:42.074631,oppositeLon:24.838850,length:2500,width:45,ils:true,category:"CAT I",frequency:"109.9"},
-{airport:"LBWN",city:"Varna",runway:"09",lat:43.233333,lon:27.810000,oppositeLat:43.230556,oppositeLon:27.840556,length:2500,width:45,ils:true,category:"CAT I",frequency:"109.9"},
+{airport:"LBPD",city:"Plovdiv",runway:"30",lat:42.061006,lon:24.862908,oppositeLat:42.074631,oppositeLon:24.838850,length:2500,width:45,ils:true,category:"CAT I",frequency:"109.9",gpAngle:3.0,thrElevFt:603,tchFt:50},
+{airport:"LBWN",city:"Varna",runway:"09",lat:43.233333,lon:27.810000,oppositeLat:43.230556,oppositeLon:27.840556,length:2500,width:45,ils:true,category:"CAT I",frequency:"109.9",gpAngle:3.0,thrElevFt:204,tchFt:50},
 {airport:"LBWN",city:"Varna",runway:"27",lat:43.230556,lon:27.840556,oppositeLat:43.233333,oppositeLon:27.810000,length:2500,width:45,ils:false,category:null,frequency:null},
 {airport:"LBBG",city:"Burgas",runway:"04",lat:42.559828,lon:27.501597,oppositeLat:42.580431,oppositeLon:27.528883,length:3202,width:45,ils:false,category:null,frequency:null},
-{airport:"LBBG",city:"Burgas",runway:"22",lat:42.580431,lon:27.528883,oppositeLat:42.559828,oppositeLon:27.501597,length:3202,width:45,ils:true,category:"CAT I",frequency:"110.3"}
+{airport:"LBBG",city:"Burgas",runway:"22",lat:42.580431,lon:27.528883,oppositeLat:42.559828,oppositeLon:27.501597,length:3202,width:45,ils:true,category:"CAT I",frequency:"110.3",gpAngle:3.0,thrElevFt:120,tchFt:50}
 ];
 let currentRange=5,detectedRunway=null,rawFlightPoints=[],finalTrack=[],rolloutTrack=[];
 const rad=d=>d*Math.PI/180,deg=r=>r*180/Math.PI;
