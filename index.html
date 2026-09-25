@@ -103,19 +103,25 @@ const finalChart=new Chart(document.getElementById("finalChart"),{type:"scatter"
 
 const gpChart=new Chart(document.getElementById("gpChart"),{type:"scatter",data:{datasets:[{label:"ADS-B height above runway",data:[],borderColor:"#0874d1",backgroundColor:"#0874d1",borderWidth:2.5,pointRadius:3.5,showLine:true},{label:"Nominal ILS GP (3.0°)",data:[],borderColor:"#d7263d",borderWidth:2.5,borderDash:[8,7],pointRadius:0,showLine:true},{label:"Upper GP limit (1.24 θ)",data:[],borderColor:"#ff7a00",borderWidth:2,borderDash:[6,6],pointRadius:0,showLine:true},{label:"Lower GP limit (0.76 θ)",data:[],borderColor:"#18a448",borderWidth:2,borderDash:[6,6],pointRadius:0,showLine:true},{label:"Runway between GP origin and DTHR",data:[],borderColor:"#555",borderWidth:8,pointRadius:0,showLine:true}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{position:"bottom"},tooltip:{callbacks:{label:c=>{if(c.raw&&c.raw.source){return "Aircraft: "+c.raw.aircraftHeightM.toFixed(1)+" m above runway | Nominal GP: "+c.raw.gpHeightM.toFixed(1)+" m | ΔGP: "+(c.raw.gpDeviationM>=0?"+":"")+c.raw.gpDeviationM.toFixed(1)+" m"+(c.raw.source.utc?" | "+c.raw.source.utc:"")}return c.dataset.label+": "+c.parsed.y.toFixed(1)+" m"}}}},scales:{x:{type:"linear",min:-.2,max:5,title:{display:true,text:"Distance relative to DTHR [NM]"},ticks:{callback:v=>Math.abs(v)<.02?"DTHR":(v<0?Math.abs(v).toFixed(2)+" NM RWY":v+" NM")}},y:{min:0,title:{display:true,text:"Height above runway [m]"},ticks:{callback:v=>v+" m"}}}}});
 function updateGpScale(){
+  // Scale from the known threshold crossing height, not from ADS-B data.
+  // This avoids Chart.js falling back to 0–1 m if a calculated value is invalid.
   if(!detectedRunway || !Number.isFinite(detectedRunway.gpAngle)){
     gpChart.options.scales.y.min=0;
     gpChart.options.scales.y.max=100;
+    gpChart.options.scales.y.ticks.stepSize=20;
     return;
   }
-  // Deterministic GP scale from geometry, independent of ADS-B data.
-  // Upper full-scale beam = 1.24 theta, measured from the same geometric origin.
   const origin=gpOriginDistanceNM(detectedRunway);
-  const upperAngle=gpLimitAngleDeg(detectedRunway,1);
-  const maxHeight=(currentRange+origin)*1852*Math.tan(rad(upperAngle));
+  const theta=rad(detectedRunway.gpAngle);
+  const upperTheta=theta*1.24;
+  let maxHeight=(currentRange+origin)*1852*Math.tan(upperTheta);
+  if(!Number.isFinite(maxHeight) || maxHeight<=0){
+    // Guaranteed fallback derived from TCH=15.5 m and distance ratio.
+    maxHeight=15.5*((currentRange+origin)/Math.max(origin,0.001))*1.24;
+  }
   const step=currentRange<=5?50:100;
   gpChart.options.scales.y.min=0;
-  gpChart.options.scales.y.max=Math.max(step,Math.ceil((maxHeight+step*0.35)/step)*step);
+  gpChart.options.scales.y.max=Math.ceil((maxHeight+step*0.30)/step)*step;
   gpChart.options.scales.y.ticks.stepSize=step;
 }
 function updateCharts(){if(!detectedRunway)return;const rev=approachDisplayedFromLeft(detectedRunway);finalChart.options.scales.x.min=0;finalChart.options.scales.x.max=currentRange;finalChart.options.scales.x.reverse=rev;finalChart.options.scales.y.min=-100;finalChart.options.scales.y.max=100;finalChart.data.datasets[0].data=finalTrack.filter(p=>p.x>=0&&p.x<=currentRange);finalChart.data.datasets[1].data=makeLimit(1,currentRange);finalChart.data.datasets[2].data=makeLimit(-1,currentRange);finalChart.update();const gpt=makeGpTrack(currentRange),gpr=makeGpReference(currentRange),gpu=makeGpLimit(1,currentRange),gpl=makeGpLimit(-1,currentRange),gprwy=makeGpRunway();const origin=gpOriginDistanceNM(detectedRunway);gpChart.options.scales.x.min=-origin;gpChart.options.scales.x.max=currentRange;gpChart.options.scales.x.reverse=false;gpChart.data.datasets[0].data=gpt;gpChart.data.datasets[1].data=gpr;gpChart.data.datasets[2].data=gpu;gpChart.data.datasets[3].data=gpl;gpChart.data.datasets[4].data=gprwy;updateGpScale();gpChart.update();const rnm=detectedRunway.length/1852;rolloutChart.options.scales.x.min=-rnm;rolloutChart.options.scales.x.max=.05;rolloutChart.options.scales.x.reverse=rev;rolloutChart.options.scales.y.min=-50;rolloutChart.options.scales.y.max=50;rolloutChart.data.datasets[0].data=rolloutTrack;rolloutChart.update()}
