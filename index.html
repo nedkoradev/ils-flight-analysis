@@ -82,6 +82,19 @@ function makeGpRunway(){
   const origin=gpOriginDistanceNM(detectedRunway);
   return [{x:-origin,y:0},{x:0,y:0}];
 }
+function estimateAdsBAltitudeAtDthr(){
+  const pts=finalTrack
+    .filter(p=>p&&p.source&&Number.isFinite(p.source.altitude)&&Number.isFinite(p.x))
+    .sort((a,b)=>a.x-b.x);
+  if(!pts.length)return NaN;
+  // Prefer linear extrapolation/interpolation from the two closest final-approach points.
+  const near=pts.slice().sort((a,b)=>Math.abs(a.x)-Math.abs(b.x)).slice(0,2);
+  if(near.length>=2 && Math.abs(near[1].x-near[0].x)>1e-6){
+    const a=near[0],b=near[1];
+    return a.source.altitude+(0-a.x)*(b.source.altitude-a.source.altitude)/(b.x-a.x);
+  }
+  return near[0].source.altitude;
+}
 function gpDatumCorrectionFt(rwy){
   const adsbAtDthr=estimateAdsBAltitudeAtDthr();
   if(!Number.isFinite(adsbAtDthr))return 0;
