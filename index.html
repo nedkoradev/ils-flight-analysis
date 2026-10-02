@@ -73,15 +73,36 @@ function readFlightKML(text){
     if(seq.length) candidates.push(seq);
   }
 
-  if(!candidates.length) throw new Error("No track coordinates found in KML (LineString or gx:Track required).");
   let pts=candidates.sort((a,b)=>b.length-a.length)[0];
+  // Flightradar24 fallback: its track is stored as timestamped Point Placemarks.
+  if(!pts||pts.length<5){
+    const fr24=[];
+    for(const placemark of [...xml.getElementsByTagName("Placemark")]){
+      const point=placemark.getElementsByTagName("Point")[0],when=placemark.getElementsByTagName("when")[0];
+      const coordinateNode=point&&point.getElementsByTagName("coordinates")[0];
+      if(!coordinateNode||!when)continue;
+      const values=coordinateNode.textContent.trim().split(/\s+/)[0].split(","),lon=Number(values[0]),lat=Number(values[1]);
+      if(!Number.isFinite(lon)||!Number.isFinite(lat))continue;
+      const description=(placemark.getElementsByTagName("description")[0]?.textContent||"").replace(/<[^>]*>/g," ").replace(/&nbsp;/gi," ");
+      const field=name=>{const m=description.match(new RegExp(name+"\\s*:?\\s*([+-]?[\\d,.]+)","i"));return m?Number(m[1].replace(/,/g,"")):null};
+      const coordinateAltitude=values.length>=3&&values[2].trim()!==""?Number(values[2]):NaN;
+      const fallbackAltitude=field("altitude");
+      const direction=field("(?:heading|direction)");
+      const speed=field("speed");
+      fr24.push({lat,lon,altitude:Number.isFinite(coordinateAltitude)?coordinateAltitude*3.280839895:Number.isFinite(fallbackAltitude)?fallbackAltitude:null,direction:Number.isFinite(direction)?direction:null,speed:Number.isFinite(speed)?speed:null,callsign:"KML",utc:when.textContent.trim()});
+    }
+    fr24.sort((a,b)=>Date.parse(a.utc)-Date.parse(b.utc));
+    if(fr24.length)pts=fr24;
+  }
+
+  if(!pts) throw new Error("No track coordinates found in KML (LineString or gx:Track required).");
   if(pts.length<5) throw new Error("Not enough valid track points in KML.");
 
   // Remove consecutive duplicate positions and derive track heading from geometry.
   pts=pts.filter((p,i,a)=>!i || distanceMetres(p.lat,p.lon,a[i-1].lat,a[i-1].lon)>0.5);
   for(let i=0;i<pts.length;i++){
     let j=i<pts.length-1?i+1:i-1;
-    if(j>=0 && j<pts.length && j!==i){
+    if(!Number.isFinite(pts[i].direction)&&j>=0 && j<pts.length && j!==i){
       pts[i].direction=i<pts.length-1?bearing(pts[i].lat,pts[i].lon,pts[j].lat,pts[j].lon):bearing(pts[j].lat,pts[j].lon,pts[i].lat,pts[i].lon);
     }
   }
