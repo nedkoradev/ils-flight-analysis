@@ -41,39 +41,83 @@ function localXY(lat,lon,rwy){const R=6371000,lat0=rad(rwy.lat);return{north:rad
 function positionToRunway(lat,lon,rwy){const p=localXY(lat,lon,rwy),c=rad(runwayCourse(rwy)),landingEast=Math.sin(c),landingNorth=Math.cos(c),approachEast=-landingEast,approachNorth=-landingNorth;return{x:(p.east*approachEast+p.north*approachNorth)/1852,y:p.east*landingNorth+p.north*(-landingEast)}}
 function parseCSVLine(line){const values=[];let current="",inside=false;for(const c of line){if(c==='"')inside=!inside;else if(c===','&&!inside){values.push(current.trim());current=""}else current+=c}values.push(current.trim());return values}
 function readFlightCSV(text){const lines=text.split(/\r?\n/).filter(x=>x.trim());if(lines.length<2)throw new Error("CSV file is empty.");const h=parseCSVLine(lines[0]),ip=h.indexOf("Position"),id=h.indexOf("Direction"),ia=h.indexOf("Altitude"),is=h.indexOf("Speed"),ic=h.indexOf("Callsign"),iu=h.indexOf("UTC");if(ip<0)throw new Error("Position column not found.");const pts=[];for(let i=1;i<lines.length;i++){const r=parseCSVLine(lines[i]),pos=r[ip];if(!pos)continue;const a=pos.split(","),lat=parseFloat(a[0]),lon=parseFloat(a[1]);if(a.length!==2||!Number.isFinite(lat)||!Number.isFinite(lon))continue;pts.push({lat,lon,direction:id>=0?parseFloat(r[id]):null,altitude:ia>=0?parseFloat(r[ia]):null,speed:is>=0?parseFloat(r[is]):null,callsign:ic>=0?r[ic]:"",utc:iu>=0?r[iu]:""})}if(pts.length<5)throw new Error("Not enough valid ADS-B points.");return pts}
+const KML_METRES_TO_FEET=3.280839895;
+function kmlElements(root,localName){return [...root.getElementsByTagName("*")].filter(n=>n.localName===localName)}
+function kmlAltitudeFeet(value){
+  if(value===undefined||value===null||String(value).trim()==="")return null;
+  const metres=Number(value);
+  return Number.isFinite(metres)?metres*KML_METRES_TO_FEET:null;
+}
+function parseKMLCoordinate(text,separator){
+  const values=text.trim().split(separator).map(v=>v.trim());
+  const lon=Number(values[0]),lat=Number(values[1]);
+  if(values.length<2||!Number.isFinite(lon)||!Number.isFinite(lat))return null;
+  return {lat,lon,altitude:kmlAltitudeFeet(values[2])};
+}
+function descriptionAltitudeFeet(placemark){
+  const description=kmlElements(placemark,"description")[0];
+  if(!description)return null;
+  // Flightradar24 descriptions are usually CDATA containing an HTML table or <br> tags.
+  const plain=description.textContent.replace(/<[^>]*>/g," ").replace(/&nbsp;/gi," ");
+  const match=plain.match(/altitude\s*:?\s*([+-]?[\d,.]+)\s*(?:ft|feet)\b/i);
+  if(!match)return null;
+  const feet=Number(match[1].replace(/,/g,""));
+  return Number.isFinite(feet)?feet:null;
+}
+function kmlPoint(coordinate,utc="",fallbackAltitude=null){
+  return {lat:coordinate.lat,lon:coordinate.lon,altitude:Number.isFinite(coordinate.altitude)?coordinate.altitude:fallbackAltitude,direction:null,speed:null,callsign:"KML",utc};
+}
 function readFlightKML(text){
   const xml=new DOMParser().parseFromString(text,"application/xml");
   if(xml.querySelector("parsererror")) throw new Error("Invalid KML file.");
 
   const candidates=[];
-  // Standard KML: collect each <coordinates> block separately and use the longest track.
-  for(const node of [...xml.getElementsByTagName("coordinates")]){
+  // gx:Track timestamps and coordinates are paired within each Track, rather than globally.
+  for(const track of kmlElements(xml,"Track")){
     const seq=[];
-    for(const token of node.textContent.trim().split(/\s+/)){
-      if(!token) continue;
-      const a=token.split(",").map(Number);
-      if(a.length>=2 && Number.isFinite(a[0]) && Number.isFinite(a[1])){
-        seq.push({lat:a[1],lon:a[0],altitude:Number.isFinite(a[2])?a[2]*3.280839895:null,direction:null,speed:null,callsign:"KML",utc:""});
+    const whens=kmlElements(track,"when").map(n=>n.textContent.trim());
+    kmlElements(track,"coord").forEach((node,i)=>{
+      const coordinate=parseKMLCoordinate(node.textContent,/\s+/);
+      if(coordinate)seq.push(kmlPoint(coordinate,whens[i]||""));
+    });
+    if(seq.length) candidates.push(seq);
+  }
+
+  // Standard LineString KML. Every KML altitude is metres; internal/CSV altitude is feet.
+  for(const lineString of kmlElements(xml,"LineString")){
+    const seq=[];
+    for(const node of kmlElements(lineString,"coordinates")){
+      for(const token of node.textContent.trim().split(/\s+/)){
+        if(!token)continue;
+        const coordinate=parseKMLCoordinate(token,",");
+        if(coordinate)seq.push(kmlPoint(coordinate));
       }
     }
     if(seq.length) candidates.push(seq);
   }
 
-  // Google Earth gx:Track. Namespace-safe: inspect localName instead of relying on prefix handling.
-  const gxCoords=[...xml.getElementsByTagName("*")].filter(n=>n.localName==="coord");
-  if(gxCoords.length){
-    const whens=[...xml.getElementsByTagName("when")].map(n=>n.textContent.trim());
-    const seq=[];
-    gxCoords.forEach((node,i)=>{
-      const a=node.textContent.trim().split(/\s+/).map(Number);
-      if(a.length>=2 && Number.isFinite(a[0]) && Number.isFinite(a[1])){
-        seq.push({lat:a[1],lon:a[0],altitude:Number.isFinite(a[2])?a[2]*3.280839895:null,direction:null,speed:null,callsign:"KML",utc:whens[i]||""});
-      }
-    });
-    if(seq.length) candidates.push(seq);
+  // Flightradar24 exports one timestamped Point Placemark per ADS-B sample.
+  const pointTrack=[];
+  for(const placemark of kmlElements(xml,"Placemark")){
+    const point=kmlElements(placemark,"Point")[0];
+    if(!point)continue;
+    const coordinateNode=kmlElements(point,"coordinates")[0];
+    if(!coordinateNode)continue;
+    const coordinate=parseKMLCoordinate(coordinateNode.textContent.trim().split(/\s+/)[0]||"",",");
+    if(!coordinate)continue;
+    const when=kmlElements(placemark,"when")[0];
+    const name=kmlElements(placemark,"name")[0];
+    const utc=(when&&when.textContent.trim())||(name&&/^\d{4}-\d\d-\d\d[T ]/.test(name.textContent.trim())?name.textContent.trim():"");
+    if(!utc)continue; // Exclude airport pins and other non-track Point Placemarks.
+    pointTrack.push(kmlPoint(coordinate,utc,descriptionAltitudeFeet(placemark)));
+  }
+  if(pointTrack.length){
+    // FR24 files are normally chronological, but timestamps make ordering unambiguous.
+    pointTrack.sort((a,b)=>{const at=Date.parse(a.utc),bt=Date.parse(b.utc);return Number.isFinite(at)&&Number.isFinite(bt)?at-bt:0});
+    candidates.push(pointTrack);
   }
 
-  if(!candidates.length) throw new Error("No track coordinates found in KML (LineString or gx:Track required).");
+  if(!candidates.length) throw new Error("No track coordinates found in KML (gx:Track, LineString, or timestamped Point Placemarks required).");
   let pts=candidates.sort((a,b)=>b.length-a.length)[0];
   if(pts.length<5) throw new Error("Not enough valid track points in KML.");
 
