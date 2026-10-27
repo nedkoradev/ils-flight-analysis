@@ -230,13 +230,13 @@ function updateCharts(){
   const gpt=makeGpTrack(currentRange),gpr=makeGpReference(currentRange),gpu=makeGpLimit(1,currentRange),gpl=makeGpLimit(-1,currentRange),gprwy=makeGpRunway();
   const origin=gpOriginDistanceNM(detectedRunway);
   // Main GP chart: completely linear physical X axis. No warping, so all GP reference lines remain straight.
-  gpChart.options.scales.x.min=-origin;gpChart.options.scales.x.max=currentRange;gpChart.options.scales.x.reverse=false;
+  gpChart.options.scales.x.min=-origin;gpChart.options.scales.x.max=currentRange;gpChart.options.scales.x.reverse=rev;
   gpChart.data.datasets[0].data=gpt;gpChart.data.datasets[1].data=gpr;gpChart.data.datasets[2].data=gpu;gpChart.data.datasets[3].data=gpl;gpChart.data.datasets[4].data=gprwy;
   updateGpScale();gpChart.update();
 
   // Separate linear zoom around the threshold. Same physical geometry; no broken/non-linear axis.
   const zoomMax=.50;
-  gpZoomChart.options.scales.x.min=-origin;gpZoomChart.options.scales.x.max=zoomMax;
+  gpZoomChart.options.scales.x.min=-origin;gpZoomChart.options.scales.x.max=zoomMax;gpZoomChart.options.scales.x.reverse=rev;
   gpZoomChart.options.scales.y.min=0;
   const zoomUpper=(zoomMax+origin)*1852*Math.tan(rad(gpLimitAngleDeg(detectedRunway,1)));
   gpZoomChart.options.scales.y.max=Math.ceil((zoomUpper+10)/10)*10;
