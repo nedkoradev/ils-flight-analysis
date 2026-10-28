@@ -8,20 +8,20 @@
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#10233f}header{background:#0c2138;color:#fff;padding:22px;text-align:center;position:relative}header h1{margin:0;font-size:30px}.home-link{position:absolute;left:22px;top:22px;color:#fff;text-decoration:none;border:1px solid #587087;border-radius:7px;padding:8px 12px;font-weight:700}.home-link:hover,.home-link:focus{background:#fff;color:#0c2138}.home-link:focus{outline:3px solid #5eb9ff;outline-offset:2px}header p{margin:8px 0 0;color:#bdd0e2}.container{max-width:1500px;margin:auto;padding:24px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap}.runway-info{background:#fff;padding:15px 22px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.08)}.runway-info strong{color:#0874d1}.cat{display:inline-block;margin-left:12px;background:#143b66;color:#fff;padding:6px 14px;border-radius:20px;font-weight:bold}.cat.no-ils{background:#777}.view-buttons button{padding:10px 22px;border:1px solid #b9c7d6;background:#fff;border-radius:7px;cursor:pointer;font-size:16px}.view-buttons button.active{background:#0874d1;color:#fff;border-color:#0874d1}.upload-box{background:#fff;border:2px dashed #8ba7c4;border-radius:14px;padding:24px;text-align:center;margin-bottom:22px}.upload-box h2{margin-top:0}#fileInfo{margin-top:14px;color:#52677c;line-height:1.7}.status{margin-top:12px;font-weight:bold}.success{color:#087b37}.error{color:#b42318}.chart-card{background:#fff;border-radius:15px;padding:20px;margin-bottom:22px;box-shadow:0 2px 12px rgba(0,0,0,.08)}.chart-title{text-align:center}.chart-title h2{margin:0;font-size:25px}.chart-title p{margin:7px 0 12px;color:#586b7f}.chart-wrapper{position:relative;height:480px}.gp-wrapper{position:relative;height:480px}.gp-zoom-wrapper{position:relative;height:360px;margin-top:18px;border:2px solid #cfe3f7;border-radius:12px;padding:10px}.gp-zoom-title{text-align:center;font-size:20px;font-weight:700;margin:8px 0;color:#10233f}.gp-correction{text-align:center;color:#52677c;font-size:14px;font-weight:700;margin:-4px 0 12px}.rollout-wrapper{position:relative;height:420px}.note{margin-top:12px;padding:12px;background:#f3f6fa;border-radius:8px;text-align:center;color:#52677c;font-size:14px}@media(max-width:700px){header{padding-top:66px}.home-link{top:16px;left:16px}.chart-wrapper,.gp-wrapper,.rollout-wrapper{height:400px}}
 
-/* Dashboard refresh v1.1.3 */
+/* Dashboard refresh v1.1.4 */
 header{background:linear-gradient(115deg,#071b30,#104571);text-align:left;padding:24px max(24px,calc((100vw - 1450px)/2))}header h1{font-size:30px;letter-spacing:.3px}header p{font-size:14px}.version{position:absolute;right:24px;top:25px;border:1px solid #6083a7;border-radius:7px;padding:5px 10px;font-size:13px;color:#d8ecff}.container{max-width:1500px}.topbar{background:#fff;border:1px solid #d8e5f1;padding:12px 16px;border-radius:12px;margin-bottom:8px}.runway-info{box-shadow:none;padding:6px 0}.view-buttons{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.view-buttons button{font-size:13px;font-weight:700;padding:10px 15px}.upload-box{display:flex;align-items:center;gap:15px;text-align:left;padding:12px 16px;margin-bottom:8px;border:1px solid #d8e5f1;border-radius:12px}.upload-box h2{font-size:15px;margin:0;white-space:nowrap}.upload-box p{display:none}.upload-box input{max-width:245px}.upload-box #fileInfo{display:none}.upload-box #status{margin:0;font-size:12px}.track-strip{background:#eaf4ff;border:1px solid #d6e7f7;border-radius:9px;padding:9px 14px;margin-bottom:18px;font-size:13px;color:#25486b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chart-card{border:1px solid #dbe8f4;box-shadow:0 2px 9px #163a5c12}.chart-title h2{color:#0b315a}.geometry-modal[hidden]{display:none}.geometry-modal{position:fixed;inset:0;z-index:9999;background:#03182edb;display:flex;align-items:center;justify-content:center;padding:20px}.geometry-panel{background:#f7fbff;border-radius:16px;width:min(1120px,98vw);max-height:92vh;overflow:auto;box-shadow:0 22px 80px #0008}.geometry-head{background:linear-gradient(110deg,#08233e,#104e7f);color:#fff;padding:18px 22px;display:flex;justify-content:space-between;align-items:center}.geometry-head h2{margin:0;font-size:21px}.geometry-close{background:#fff;color:#0b315a;border:0;border-radius:7px;padding:8px 14px;font-weight:bold;cursor:pointer}.geometry-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:18px}.geometry-card{background:white;border:1px solid #d5e4f2;border-radius:12px;padding:12px;min-width:0}.geometry-card h3{margin:0 0 8px;color:#0b315a}.geometry-card svg{width:100%;height:auto}.geometry-caption{font-size:12px;color:#55718c;margin:6px 0 0}.geometry-legend{padding:0 20px 20px;color:#52677c;font-size:13px}@media(max-width:760px){header{padding:20px 16px 20px}header h1{font-size:24px}.version{right:12px;top:12px}.topbar{align-items:flex-start}.upload-box{flex-wrap:wrap}.geometry-grid{grid-template-columns:1fr}.geometry-head h2{font-size:16px}}
-.approach-picker{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #c9deef;border-radius:10px;padding:10px 15px;margin:0 0 8px;flex-wrap:wrap}.approach-picker[hidden]{display:none}.approach-picker label{font-weight:700;color:#123c66}.approach-picker select{min-width:235px;padding:9px 12px;border:1px solid #8aa8c5;border-radius:7px;background:#f5faff;color:#143b66;font-weight:700}.approach-picker span{font-size:13px;color:#54708b}</style>
+.approach-picker{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #c9deef;border-radius:10px;padding:10px 15px;margin:0 0 8px;flex-wrap:wrap}.approach-picker[hidden]{display:none}.approach-picker label{font-weight:700;color:#123c66}.approach-picker select{min-width:235px;padding:9px 12px;border:1px solid #8aa8c5;border-radius:7px;background:#f5faff;color:#143b66;font-weight:700}.approach-picker span{font-size:13px;color:#54708b}.approach-choices{display:flex;align-items:center;gap:8px;overflow-x:auto;white-space:nowrap;padding:4px 2px 12px;margin-bottom:10px;border-bottom:1px solid #e1eaf3;scrollbar-width:thin}.approach-choices:empty{display:none}.approach-choices .choices-caption{font-size:12px;font-weight:700;color:#486783;margin-right:5px}.approach-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid #d2dfeb;border-radius:8px;background:#f5f8fc;color:#53667c;font-size:12px;cursor:pointer;flex-shrink:0}.approach-chip:has(input:checked){background:#edf6ff;border-color:var(--pass-color);color:#102d4c;font-weight:700}.approach-chip input{accent-color:var(--pass-color);cursor:pointer;margin:0}.approach-chip .color-dot{width:9px;height:9px;border-radius:50%;background:var(--pass-color)}
+</style>
 </head>
 <body>
-<header><span class="version">v1.1.3</span><h1>✈ ILS Flight Analysis</h1><p>ADS-B final approach and runway rollout analysis</p></header>
+<header><span class="version">v1.1.4</span><h1>✈ ILS Flight Analysis</h1><p>ADS-B final approach and runway rollout analysis</p></header>
 <div class="container">
 <div class="topbar"><div class="runway-info">Airport: <strong id="airportLabel">waiting for flight data...</strong> &nbsp; | &nbsp; Runway: <strong id="runwayLabel">--</strong><span class="cat" id="catLabel">--</span></div><div class="view-buttons"><button id="btn5" class="active">5 NM</button><button id="btn10">10 NM</button></div></div>
 <div class="upload-box"><h2>Load ADS-B flight data</h2><p style="margin:-6px 0 14px;color:#66788a">Supported files: CSV and KML</p><input type="file" id="fileInput" accept=".csv,.kml"><div id="fileInfo">No file selected</div><div id="status" class="status"></div></div>
-<div id="approachPicker" class="approach-picker" hidden><label for="approachSelect">Approach</label><select id="approachSelect"></select><span id="approachSummary"></span></div>
 <div id="trackStrip" class="track-strip" title="Flight track information">No flight track loaded · Select a CSV or KML file to begin.</div>
-<div class="chart-card"><div class="chart-title"><h2 id="finalTitle">ILS Final Approach</h2><p id="finalSubtitle">Lateral deviation relative to runway centreline</p></div><div class="chart-wrapper"><canvas id="finalChart"></canvas></div><div class="note" id="finalNote">Final approach display: ±100 m minimum; automatically expands for larger deviations.</div></div>
-<div class="chart-card"><div class="chart-title"><h2 id="gpTitle">ILS Glide Path</h2><p id="gpSubtitle">Vertical profile relative to the ILS glide path</p></div><div class="gp-correction" id="gpCorrection">ADS-B altitude correction: waiting for flight data</div><div class="gp-wrapper"><canvas id="gpChart"></canvas></div><div class="gp-zoom-title">Zoom: GP origin → DTHR → 0.50 NM</div><div class="gp-zoom-wrapper"><canvas id="gpZoomChart"></canvas></div><div class="note" id="gpNote">GP course alignment: ADS-B trajectory, nominal glide path and upper/lower GP course-structure limits.</div></div>
-<div class="chart-card"><div class="chart-title"><h2 id="rolloutTitle">Runway Rollout</h2><p id="rolloutSubtitle">ADS-B movement on the runway after DTHR</p></div><div class="rollout-wrapper"><canvas id="rolloutChart"></canvas></div><div class="note" id="rolloutNote">Only movement on the runway is displayed. Taxiway movement is excluded.</div></div>
+<div class="chart-card"><div class="approach-choices" data-approach-controls="loc"></div><div class="chart-title"><h2 id="finalTitle">ILS Final Approach</h2><p id="finalSubtitle">Lateral deviation relative to runway centreline</p></div><div class="chart-wrapper"><canvas id="finalChart"></canvas></div><div class="note" id="finalNote">Final approach display: ±100 m minimum; automatically expands for larger deviations.</div></div>
+<div class="chart-card"><div class="approach-choices" data-approach-controls="gp"></div><div class="chart-title"><h2 id="gpTitle">ILS Glide Path</h2><p id="gpSubtitle">Vertical profile relative to the ILS glide path</p></div><div class="gp-correction" id="gpCorrection">ADS-B altitude correction: waiting for flight data</div><div class="gp-wrapper"><canvas id="gpChart"></canvas></div><div class="approach-choices" data-approach-controls="zoom"></div><div class="gp-zoom-title">Zoom: GP origin → DTHR → 0.50 NM</div><div class="gp-zoom-wrapper"><canvas id="gpZoomChart"></canvas></div><div class="note" id="gpNote">GP course alignment: ADS-B trajectory, nominal glide path and upper/lower GP course-structure limits.</div></div>
+<div class="chart-card"><div class="approach-choices" data-approach-controls="rollout"></div><div class="chart-title"><h2 id="rolloutTitle">Runway Rollout</h2><p id="rolloutSubtitle">ADS-B movement on the runway after DTHR</p></div><div class="rollout-wrapper"><canvas id="rolloutChart"></canvas></div><div class="note" id="rolloutNote">Only movement on the runway is displayed. Taxiway movement is excluded.</div></div>
 </div>
 <script>
 const RUNWAYS=[
@@ -34,7 +34,7 @@ const RUNWAYS=[
 {airport:"LBBG",city:"Burgas",runway:"04",lat:42.559828,lon:27.501597,oppositeLat:42.580431,oppositeLon:27.528883,length:3202,width:45,ils:false,category:null,frequency:null},
 {airport:"LBBG",city:"Burgas",runway:"22",lat:42.580431,lon:27.528883,oppositeLat:42.559828,oppositeLon:27.501597,length:3202,width:45,ils:true,category:"CAT I",frequency:"110.3",gpAngle:3.0,thrElevFt:120,tchFt:50}
 ];
-let currentRange=5,detectedRunway=null,rawFlightPoints=[],finalTrack=[],rolloutTrack=[],approaches=[],activeApproach=0,loadedTrackName="";
+let currentRange=5,detectedRunway=null,rawFlightPoints=[],finalTrack=[],rolloutTrack=[],approaches=[],activeApproach=0,loadedTrackName="",selectedApproaches=new Set([0]),approachTracks=[];
 const rad=d=>d*Math.PI/180,deg=r=>r*180/Math.PI;
 function normalizeHeading(h){h%=360;if(h<0)h+=360;return h}
 function headingDifference(a,b){let d=Math.abs(normalizeHeading(a)-normalizeHeading(b));return d>180?360-d:d}
@@ -228,21 +228,34 @@ function updateCharts(){
   const rev=approachDisplayedFromLeft(detectedRunway);
   finalChart.options.scales.x.min=0;finalChart.options.scales.x.max=currentRange;finalChart.options.scales.x.reverse=rev;
   // Expand symmetrically only when measured LOC points within 10 NM exceed ±100 m.
-  const locValues=finalTrack.filter(p=>p.x>=0&&p.x<=10&&Number.isFinite(p.y)).map(p=>Math.abs(p.y));
+  const locValues=[...selectedApproaches].flatMap(i=>approachTracks[i].final.filter(p=>p.x>=0&&p.x<=10&&Number.isFinite(p.y)).map(p=>Math.abs(p.y)));
   const maxDeviation=locValues.length?Math.max(...locValues):0;
   const locHalfRange=maxDeviation>100?Math.ceil(maxDeviation*1.1/20)*20:100;
   finalChart.options.scales.y.min=-locHalfRange;finalChart.options.scales.y.max=locHalfRange;
   finalChart.options.scales.y.ticks.stepSize=locHalfRange<=100?20:undefined;
   finalChart.data.datasets[0].data=finalTrack.filter(p=>p.x>=0&&p.x<=currentRange);
   finalChart.data.datasets[1].data=[{x:0,y:0},{x:currentRange,y:0}];
-  finalChart.data.datasets[2].data=makeLimit(1,currentRange);finalChart.data.datasets[3].data=makeLimit(-1,currentRange);finalChart.update();
+  finalChart.data.datasets[2].data=makeLimit(1,currentRange);finalChart.data.datasets[3].data=makeLimit(-1,currentRange);
+  const chosen=[...selectedApproaches].sort((a,b)=>a-b);
+  finalChart.data.datasets[0].label="Approach "+(activeApproach+1);
+  finalChart.data.datasets[0].borderColor=approachColor(activeApproach);finalChart.data.datasets[0].backgroundColor=approachColor(activeApproach);
+  finalChart.data.datasets=finalChart.data.datasets.slice(0,4).concat(chosen.filter(i=>i!==activeApproach).map(i=>overlayDataset(i,approachTracks[i].final.filter(p=>p.x>=0&&p.x<=currentRange))));
+  finalChart.update();
 
   const gpt=makeGpTrack(currentRange),gpr=makeGpReference(currentRange),gpu=makeGpLimit(1,currentRange),gpl=makeGpLimit(-1,currentRange),gprwy=makeGpRunway();
   const origin=gpOriginDistanceNM(detectedRunway);
   // Main GP chart: completely linear physical X axis. No warping, so all GP reference lines remain straight.
   gpChart.options.scales.x.min=-origin;gpChart.options.scales.x.max=currentRange;gpChart.options.scales.x.reverse=rev;
   gpChart.data.datasets[0].data=gpt;gpChart.data.datasets[1].data=gpr;gpChart.data.datasets[2].data=gpu;gpChart.data.datasets[3].data=gpl;gpChart.data.datasets[4].data=gprwy;
-  updateGpScale();gpChart.update();
+  updateGpScale();
+  const chosenGp=[...selectedApproaches].sort((a,b)=>a-b);
+  const savedFinal=finalTrack;
+  const gpPasses=new Map(chosenGp.map(i=>{finalTrack=approachTracks[i].final;return[i,makeGpTrack(currentRange)]}));
+  finalTrack=savedFinal;
+  gpChart.data.datasets[0].label="Approach "+(activeApproach+1);
+  gpChart.data.datasets[0].borderColor=approachColor(activeApproach);gpChart.data.datasets[0].backgroundColor=approachColor(activeApproach);
+  gpChart.data.datasets=gpChart.data.datasets.slice(0,5).concat(chosenGp.filter(i=>i!==activeApproach).map(i=>overlayDataset(i,gpPasses.get(i))));
+  gpChart.update();
 
   // Separate linear zoom around the threshold. Same physical geometry; no broken/non-linear axis.
   const zoomMax=.50;
@@ -255,9 +268,16 @@ function updateCharts(){
   gpZoomChart.data.datasets[2].data=gpu.filter(p=>p.x<=zoomMax);
   gpZoomChart.data.datasets[3].data=gpl.filter(p=>p.x<=zoomMax);
   gpZoomChart.data.datasets[4].data=gprwy;
+  gpZoomChart.data.datasets[0].label="Approach "+(activeApproach+1);
+  gpZoomChart.data.datasets[0].borderColor=approachColor(activeApproach);gpZoomChart.data.datasets[0].backgroundColor=approachColor(activeApproach);
+  gpZoomChart.data.datasets=gpZoomChart.data.datasets.slice(0,5).concat(chosenGp.filter(i=>i!==activeApproach).map(i=>overlayDataset(i,gpPasses.get(i).filter(p=>p.x<=zoomMax))));
   gpZoomChart.update();
 
-  const rnm=detectedRunway.length/1852;rolloutChart.options.scales.x.min=-rnm;rolloutChart.options.scales.x.max=.05;rolloutChart.options.scales.x.reverse=rev;rolloutChart.options.scales.y.min=-50;rolloutChart.options.scales.y.max=50;rolloutChart.data.datasets[0].data=rolloutTrack;rolloutChart.update();
+  const rnm=detectedRunway.length/1852;rolloutChart.options.scales.x.min=-rnm;rolloutChart.options.scales.x.max=.05;rolloutChart.options.scales.x.reverse=rev;rolloutChart.options.scales.y.min=-50;rolloutChart.options.scales.y.max=50;rolloutChart.data.datasets[0].data=rolloutTrack;
+  rolloutChart.data.datasets[0].label="Approach "+(activeApproach+1);
+  rolloutChart.data.datasets[0].borderColor=approachColor(activeApproach);rolloutChart.data.datasets[0].backgroundColor=approachColor(activeApproach);
+  rolloutChart.data.datasets=rolloutChart.data.datasets.slice(0,1).concat(chosenGp.filter(i=>i!==activeApproach).map(i=>overlayDataset(i,approachTracks[i].rollout)));
+  rolloutChart.update();
 }
 function updateDisplay(){const r=detectedRunway,c=runwayCourse(r);airportLabel.textContent=r.airport+" "+r.city;runwayLabel.textContent=r.runway;catLabel.textContent=r.ils?r.category:"NO ILS";catLabel.classList.toggle("no-ils",!r.ils);finalTitle.textContent=r.airport+" RWY "+r.runway+(r.ils?" — ILS LOC "+r.category:" — Final Approach");finalSubtitle.textContent=r.ils?"LOC course alignment | Localizer lateral deviation | "+r.frequency+" MHz | True runway course ≈ "+c.toFixed(1)+"°":"Final approach | True runway course ≈ "+c.toFixed(1)+"°";gpTitle.textContent=r.airport+" RWY "+r.runway+" — ILS Glide Path";gpSubtitle.textContent=Number.isFinite(r.gpAngle)?"Vertical profile | Nominal "+r.gpAngle.toFixed(1)+"° | full-scale limits 0.76θ–1.24θ | runway = 0 m":"Vertical profile | GP parameters not yet configured for this runway";const correction=gpAltitudeCorrection(r);gpCorrection.textContent=correction.available?"ADS-B altitude correction: "+(correction.metres>=0?"+":"")+Math.round(correction.metres)+" m ("+correction.method+")":"ADS-B altitude correction: "+correction.method;gpNote.textContent=Number.isFinite(r.gpAngle)?"Runway = 0 m. The GP geometric origin is shown on the runway about "+Math.round(gpOriginDistanceNM(r)*1852)+" m after DTHR. Nominal "+r.gpAngle.toFixed(1)+"° GP crosses DTHR at 15.5 m. Full-scale GP limits are 0.76θ and 1.24θ (DDM ±0.175). ADS-B barometric altitude is corrected by a single constant offset derived from the stable final approach (1–5 NM). No ADS-B points are synthesized near DTHR.":"GP parameters are not configured for this runway.";rolloutTitle.textContent=r.airport+" RWY "+r.runway+" — Runway Rollout";rolloutSubtitle.textContent="ADS-B movement on the runway from DTHR until runway exit";finalNote.textContent=r.ils?"ILS LOC "+r.frequency+" MHz | "+r.category+" | THR reference ±"+thresholdAlignmentLimit(r.category).toFixed(1)+" m | LOC display: ±100 m minimum, automatically expands when required.":"No ILS configured for this runway direction.";rolloutNote.textContent=rolloutTrack.length+" ADS-B points retained on the runway. Taxiway movement is excluded. Display fixed at ±50 m.";updateCharts()}
 function setRange(n){currentRange=n;btn5.classList.toggle("active",n===5);btn10.classList.toggle("active",n===10);updateCharts()}btn5.onclick=()=>setRange(5);btn10.onclick=()=>setRange(10);
@@ -296,26 +316,53 @@ function findApproachPasses(points,rwy){
   }
   return merged;
 }
+const APPROACH_COLORS=["#0874d1","#e55340","#16a085","#8b5cf6","#d08a13","#cc3f91","#367c4a","#5768b4","#a45527","#12a4b6","#b33b48","#56677a"];
+function approachColor(i){return APPROACH_COLORS[i%APPROACH_COLORS.length]}
+function buildApproachTrack(a){
+  const segment=rawFlightPoints.slice(a.start,a.end+1),tracks=buildTracks(segment,a.runway);
+  let final=tracks.final;
+  if(final.length<3)final=projectFlight(segment,a.runway).filter(q=>q.x>=0&&q.x<=10.5&&Math.abs(q.y)<=120+q.x*60&&(q.headingDiff===null||q.headingDiff<=50)).map(q=>({x:q.x,y:q.y,source:q.source}));
+  return{final,rollout:tracks.rollout,segment};
+}
+function renderApproachChoices(){
+  document.querySelectorAll("[data-approach-controls]").forEach(bar=>{
+    bar.replaceChildren();
+    if(approaches.length<2)return;
+    const caption=document.createElement("span");caption.className="choices-caption";caption.textContent="Approaches:";bar.append(caption);
+    approaches.forEach((a,i)=>{
+      const label=document.createElement("label");label.className="approach-chip";label.style.setProperty("--pass-color",approachColor(i));
+      const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.checked=selectedApproaches.has(i);checkbox.dataset.approach=String(i);checkbox.addEventListener("change",()=>toggleApproach(i,checkbox.checked));
+      const dot=document.createElement("span");dot.className="color-dot";
+      const name=document.createElement("span");name.textContent=(i+1)+(a.first?" · "+new Date(a.first).toLocaleTimeString("en-GB",{timeZone:"UTC",hour12:false}):"");
+      label.title="Approach "+(i+1)+" — RWY "+a.runway.runway+" — "+(a.first||"");
+      label.append(checkbox,dot,name);bar.append(label);
+    });
+  });
+}
+function toggleApproach(index,checked){
+  if(checked)selectedApproaches.add(index);else selectedApproaches.delete(index);
+  // Allow all to be deselected? Keep one so reference runway and charts remain meaningful.
+  if(!selectedApproaches.size)selectedApproaches.add(index);
+  selectApproach(Math.min(...selectedApproaches));
+}
+function overlayDataset(i,data){
+  const color=approachColor(i);
+  return{label:"Approach "+(i+1),data,borderColor:color,backgroundColor:color,borderWidth:2.5,pointRadius:2.5,showLine:true,spanGaps:false,order:0};
+}
 function selectApproach(index){
   activeApproach=index;
-  const a=approaches[index];
-  if(!a)return;
+  const a=approaches[index];if(!a)return;
   detectedRunway=a.runway;
-  const segment=rawFlightPoints.slice(a.start,a.end+1);
-  const tracks=buildTracks(segment,detectedRunway);
-  finalTrack=tracks.final;rolloutTrack=tracks.rollout;
-  // Flight-check passes may not cross the threshold: keep measured final-approach points.
-  if(finalTrack.length<3){
-    finalTrack=projectFlight(segment,detectedRunway).filter(q=>q.x>=0&&q.x<=10.5&&Math.abs(q.y)<=120+q.x*60&&(q.headingDiff===null||q.headingDiff<=50)).map(q=>({x:q.x,y:q.y,source:q.source}));
-  }
-  const first=segment[0],last=segment[segment.length-1];
-  document.getElementById("approachSummary").textContent="RWY "+detectedRunway.runway+" · "+segment.length+" points · "+(first.utc||"--")+" → "+(last.utc||"--");
-  document.getElementById("trackStrip").textContent="✈ "+loadedTrackName+"  |  Approach "+(index+1)+"/"+approaches.length+"  |  "+detectedRunway.airport+" RWY "+detectedRunway.runway+"  |  Final: "+finalTrack.length+"  |  Runway: "+rolloutTrack.length+"  |  "+(first.utc||"--")+" → "+(last.utc||"--");
+  finalTrack=approachTracks[index].final;
+  rolloutTrack=approachTracks[index].rollout;
+  const chosen=[...selectedApproaches].sort((x,y)=>x-y);
+  const first=approachTracks[index].segment[0],last=approachTracks[index].segment.at(-1);
+  document.getElementById("trackStrip").textContent="✈ "+loadedTrackName+" | "+chosen.length+"/"+approaches.length+" approaches selected: "+chosen.map(i=>i+1).join(", ")+" | "+detectedRunway.airport+" RWY "+detectedRunway.runway+" | "+(first.utc||"--")+" → "+(last.utc||"--");
   status.className="status success";
-  status.textContent="✓ Approach "+(index+1)+" of "+approaches.length+" selected. Charts show only this pass.";
+  status.textContent="✓ "+chosen.length+" approach(es) selected. Colored tracks are displayed together.";
+  renderApproachChoices();
   updateDisplay();
 }
-document.getElementById("approachSelect").addEventListener("change",e=>selectApproach(Number(e.target.value)));
 
 function processFlight(text,name){
   const ext=(name.split(".").pop()||"").toLowerCase();
@@ -331,10 +378,8 @@ function processFlight(text,name){
     // Retain legacy single-landing behavior when no separate passes can be identified.
     approaches=[{start:0,end:rawFlightPoints.length-1,runway:detectedRunway,first:rawFlightPoints[0].utc,last:rawFlightPoints.at(-1).utc}];
   }
-  const picker=document.getElementById("approachPicker"),select=document.getElementById("approachSelect");
-  select.replaceChildren();
-  approaches.forEach((a,i)=>{const option=document.createElement("option");option.value=String(i);option.textContent="Approach "+(i+1)+" — RWY "+a.runway.runway+" — "+(a.first?new Date(a.first).toLocaleTimeString("en-GB",{timeZone:"UTC",hour12:false}):"")+" UTC";select.append(option)});
-  picker.hidden=approaches.length<2;
+  approachTracks=approaches.map(buildApproachTrack);
+  selectedApproaches=new Set([0]);
   fileInfo.textContent=name+" · "+rawFlightPoints.length+" track points · "+approaches.length+" detected approach(es)";
   selectApproach(0);
 }
