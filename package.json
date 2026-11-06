@@ -1,0 +1,9 @@
+{
+  "name": "ils-flight-analysis",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/gp-analysis.test.cjs",
+    "test:browser": "node tests/browser.cjs"
+  },
+  "devDependencies": { "playwright": "1.65.0" }
+}
