@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — planned v1.1.17
+## v1.1.17 — 2026-11-06
 
 - Remove automatic median fitting of altitude to the nominal glide path: constant vertical offsets are preserved.
 - Share pure altitude conversion, GP geometry and deviation calculations between both analysis pages.
@@ -9,7 +9,7 @@
 - Use the existing runway `tchFt` field (50 ft = 15.24 m), instead of hardcoded 15.5 m. The virtual GP origin is not the physical antenna location. Existing AIP data remain unverified.
 - Mark geometric envelopes as unverified references; no ICAO compliance conclusions.
 - Fix upload success/error messages and clear stale analysis after failed imports.
-- Use one version source for both entry points; unreleased work is explicitly marked. Release version/tag are deferred until publication is possible.
+- Use one version source for both entry points; unreleased work is explicitly marked. Version shared by both published entry points.
 - Add 14 mathematical regression tests, browser checks on both entry points, and GitHub Actions checks.
 
 ## v1.1.16 — existing baseline
