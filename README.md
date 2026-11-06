@@ -41,7 +41,7 @@ The unit suite checks nominal and ±15 m trajectories for runway 09/27 fixtures,
 
 ## Releases
 
-The published baseline is v1.1.16; this branch is unreleased. The next patch is planned as v1.1.17. Keep `assets/version.js` as the single display-version source and update `CHANGELOG.md` when releasing. Do not create a release tag for a failed or unpublished change. Before merging, require successful checks and an up-to-date branch; do not bypass branch protections. After merging, verify the Pages deployment and its version before reporting publication.
+The current release is v1.1.17 (2026-11-06), including the GP altitude-datum correction. Keep `assets/version.js` as the single display-version source and update `CHANGELOG.md` when releasing. Do not create a release tag for a failed or unpublished change. Before merging, require successful checks and an up-to-date branch; do not bypass branch protections. After merging, verify the Pages deployment and its version before reporting publication.
 
 ### Existing detection limitation
 
