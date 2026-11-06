@@ -18,7 +18,7 @@ const server=http.createServer((req,res)=>{
   for(const route of ['/','/ils-analysis/']){
    const response=await page.goto(`http://127.0.0.1:${server.address().port}${route}`);assert.equal(response.status(),200);
    await page.waitForFunction(()=>typeof Chart==='function'&&typeof GPAnalysis==='object');
-   assert.equal(await page.locator('[data-app-version]').textContent(),'v1.1.16 · unreleased');
+   assert.equal(await page.locator('[data-app-version]').textContent(),'v1.1.17');
    for(const index of [0,1]){
     for(const offset of [0,15,-15]){
      const csv=await page.evaluate(({index,offset})=>{
